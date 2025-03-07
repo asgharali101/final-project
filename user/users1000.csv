@@ -1,0 +1,9 @@
+id,role_id,first_name,last_name,email,password,date_of_birth,image_path,address
+1,1,Brenden,Schmidt,zevycu@mailinator.com,$2y$10$3sUW7oOM5s3DVM0.KH1uf.hBVpFI9xGVJ/8oJ3BKKy1koKkhWIoq.,2001-03-08,../../uploads/_add330e5-5781-47a0-b2f5-0f15314bd203.jpg,"Aspernatur et offici"
+2,1,Alec,Chandler,vyjowa@mailinator.com,$2y$10$9E6kh8psIUui2KT4UgabKeQH3QdSK5CBA6WtbvWZBndTHjp40Cg.2,1981-05-08,../../uploads/_cd8377b6-9daa-4283-83ca-c16105a2ac0f.jpg,"Dolor fugiat fugit"
+3,1,Veronica,Stevens,cuberowux@mailinator.com,$2y$10$WJx.S12NIINdUC7CTKkcROf9/IbjGvPss8/ZO1TcEIHi.iTtov1De,1981-04-09,../../uploads/_cd8377b6-9daa-4283-83ca-c16105a2ac0f.jpg,"Qui veniam quia per"
+4,2,Asgharali,Ali,bifiloni@mailinator.com,$2y$10$mA6AsS24s5/d8UPjESaX7ebeDt5spaLfGmU3ggv9CBk75o3mLpNSO,1978-01-17,../../uploads/_3337dd05-b4b9-40e3-95b4-0529a9f6bde8.jpg,"Laudantium fuga Te"
+7,1,Asghar,Kent,litoryda@mailinator.com,$2y$10$YDFobbBen.F9uCKccAHKkOiOMKjMef1ROkZmbbIQHnd86ETmIfH4C,1998-03-26,,"Reiciendis optio ex"
+8,1,hawkin,Higgins,tynoba@mailinator.com,$2y$10$/Fk/SCNQb3rRSfH568QrQOEQSOiSx9XqaHQ3o2aNbafqLwpcLG4Ry,2000-07-15,,"Magna delectus do a"
+9,1,Jessica,Jefferson,teraw@mailinator.com,$2y$10$FeM2qF7sZ7D8X3IROnZZ3.pN7hFZsIOqje5VmMIwNMR17/U6PMyCi,1971-12-05,../../uploads/pexels-realtoughcandy-11035390.jpg,"Voluptates eligendi "
+10,3,Madonna,Wilder,wykobovico@mailinator.com,$2y$10$6elFa.WbeJ5VfiwPHuPgZuQ1Dt6UB/b7XLs7Hm1w5IPavXVsGBWGK,2019-03-17,,"Accusantium quis ut "

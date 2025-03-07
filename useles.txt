@@ -1,0 +1,11 @@
+ <div class="field spaced">
+              <label class="label">Role</label>
+              <p class="control icons-left">
+                <!-- <?php foreach ($roles as $role) { ?> -->
+                  <select name="role_id" id="">
+                    <option value="<?php $role["id"] ?>"> <?php $role["name"] ?> </option>
+                  </select>
+                <?php } ?>
+              </p>
+              <p class="help">Please select your role</p>
+            </div>
