@@ -105,6 +105,6 @@ For questions or collaboration, reach out at:(mailto:asgharburdi786@gmail.com)
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-username/school-management-system.git
-    cd school-management-system
+    git clone https://github.com/asgharali101/final-project.git
+    cd final-project
     ```
