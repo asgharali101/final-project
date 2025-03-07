@@ -148,7 +148,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                     <form method="POST" class="flex flex-col space-y-4" action="../database/course/add.php" enctype="multipart/form-data">
                         <div class="control">
                             <label class="label">Course Name</label>
-                            <input type="text" name="title" placeholder="Enter course name" class="input" />
+                            <input required type="text" name="title" value="<?php echo $_POST["title"] ?? null ?>" placeholder="Enter course name" class="input" />
                         </div>
 
                         <div class="control">
@@ -158,7 +158,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="control">
                             <label class="label">Course Description</label>
-                            <textarea name="description" placeholder="Enter course description" class="textarea"></textarea>
+                            <textarea name="description" placeholder="Enter course description" class="textarea"><?php echo $_POST["description"] ?? null ?></textarea>
                         </div>
 
                         <div class="">

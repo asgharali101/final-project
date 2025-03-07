@@ -124,6 +124,7 @@ $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
                                 <input
                                     type="text"
                                     name="category"
+                                    value="<?php echo $_POST["category"] ?? null ?>"
                                     placeholder="Enter category name"
                                     class="pl-10 input" />
                             </div>

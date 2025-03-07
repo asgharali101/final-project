@@ -242,6 +242,7 @@ $currentTopic = null;
                                     id="title"
                                     type="text"
                                     name="title"
+                                    value="<?php echo $_POST["title"] ?? null ?>"
                                     placeholder="Enter topic title"
                                     class="w-full p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required />
@@ -254,7 +255,7 @@ $currentTopic = null;
                                     id="description"
                                     name="description"
                                     placeholder="Enter topic description"
-                                    class="w-full h-32 p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                    class="w-full h-32 p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo $_POST["description"] ?? null ?></textarea>
                             </div>
 
                             <!-- Topic Content -->
@@ -264,6 +265,7 @@ $currentTopic = null;
                                     id="content"
                                     type="text"
                                     name="content"
+                                    value="<?php echo $_POST["content"] ?? null ?>"
                                     placeholder="Enter content"
                                     class="w-full p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
