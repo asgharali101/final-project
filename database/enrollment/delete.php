@@ -11,6 +11,7 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($currentUser["role_id"] != 1) {
     header("location:../../error.php");
+    exit;
 }
 
 $id = $_GET['id'];

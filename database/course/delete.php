@@ -7,8 +7,8 @@ $stmt = $conn->query("SELECT * from users where email ='$priviousEmail'");
 $users = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($priviousEmail == null) {
-    header('location:../../index.html');
-    exit;
+    header('location:../../index.php');
+    // exit;
 }
 
 if ($users["role_id"] != 1) {

@@ -5,8 +5,7 @@ $error = '';
 session_start();
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 if ($priviousEmail == null) {
-    header('location:../../index.html');
-    exit;
+    header('location:../../index.php');
 }
 $stmt = $conn->query("SELECT * from users where email ='$priviousEmail'");
 $users = $stmt->fetch(PDO::FETCH_ASSOC);

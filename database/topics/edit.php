@@ -3,8 +3,7 @@ require_once("../../connection.php");
 session_start();
 $currentEmail = $_SESSION["user"]["email"] ?? null;
 if ($currentEmail == null) {
-    header('location:../../index.html');
-    exit;
+    header('location:../../index.php');
 }
 $stmt = $conn->query("SELECT * FROM users where email='$currentEmail'");
 $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -15,6 +14,7 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($currentUser["role_id"] != 1 || ! $id) {
     header("location:../../error.php");
+    exit;
 }
 
 if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {

@@ -6,7 +6,6 @@ session_start();
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 if ($priviousEmail === null) {
     header('location:../../index.html');
-    exit;
 }
 
 $stmt = $conn->query("SELECT * from users where email ='$priviousEmail'");
@@ -14,9 +13,9 @@ $users = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
 $id = $_GET['id'] ?? null;
-
-if (! $id  && $users["role_id"] != 1) {
+if (! $id  || $users["role_id"] != 1) {
     header("location:../../error.php");
+    exit;
 }
 
 $stmt = $conn->query("SELECT * from categories where id =$id");
