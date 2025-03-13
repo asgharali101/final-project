@@ -32,8 +32,6 @@ LEFT JOIN courses ON courses.id = enrollments.course_id');
 $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-
-
 ?>
 
 <!DOCTYPE html>

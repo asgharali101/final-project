@@ -2,6 +2,8 @@
 
 session_start();
 require_once '../connection.php';
+require_once '../database/course/add.php';
+
 
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 
@@ -145,20 +147,26 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                     </p>
                 </header>
                 <div class=" card-content">
-                    <form method="POST" class="flex flex-col space-y-4" action="../database/course/add.php" enctype="multipart/form-data">
+                    <form method="POST" class="flex flex-col space-y-4" action="" enctype="multipart/form-data">
                         <div class="control">
                             <label class="label">Course Name</label>
                             <input required type="text" name="title" value="<?php echo $_POST["title"] ?? null ?>" placeholder="Enter course name" class="input" />
+                            <p class="text-red-500" id="message"><?php echo $errors["title"] ?? null ?></p>
+
                         </div>
 
                         <div class="control">
                             <label class="label">feature_image</label>
                             <input type="file" name="feature_image" class="input" />
+                            <p class="text-red-500" id="message"><?php echo $errors["feature_image"] ?? null ?></p>
+
                         </div>
 
                         <div class="control">
                             <label class="label">Course Description</label>
                             <textarea name="description" placeholder="Enter course description" class="textarea"><?php echo $_POST["description"] ?? null ?></textarea>
+                            <p class="text-red-500" id="message"><?php echo $errors["description"] ?? null ?></p>
+
                         </div>
 
                         <div class="">
@@ -174,7 +182,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="mt-2 field">
                             <div class="control">
-                                <button type="submit" name="submit" class="button green">Submit</button>
+                                <button type="submit" name="submit" @click="showAddCourse = true" class="button green">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -182,7 +190,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php } ?>
 
-        <?php if (isset($courses)) { ?>
+        <?php if (isset($courses) && $role_id == 1 || $role_id == 2) { ?>
             <section class="pt-6 section main-section bg-gray-50">
                 <div class="container px-4 mx-auto">
                     <!-- Grid Layout -->
@@ -196,9 +204,11 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="p-4 transition-all bg-white border border-gray-200 rounded-lg shadow-lg hover:scale-100 hover:shadow-xl">
                                 <!-- Course Image -->
                                 <div class="relative overflow-hidden rounded-lg aspect-w-16 aspect-h-9">
-                                    <img src="<?= $course['feature_image'] ?? 'https://via.placeholder.com/300x200' ?>"
-                                        class="object-cover w-full h-64 rounded-lg"
-                                        alt="Course thumbnail">
+                                    <a href="./topics.php?id=<?php echo $course["id"] ?? null ?>">
+                                        <img src="<?= $course['feature_image'] ?? 'https://via.placeholder.com/300x200' ?>"
+                                            class="object-cover w-full h-64 rounded-lg"
+                                            alt="Course thumbnail">
+                                    </a>
                                     <!-- Category Badge -->
                                     <span class="absolute px-3 py-1 text-xs font-bold text-gray-800 bg-white border border-gray-300 rounded-full shadow-md top-3 left-3">
                                         <?= $course['category_name'] ?? 'Uncategorized' ?>
@@ -296,7 +306,6 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php } ?>
     </div>
-
 
     <div class="w-full">
         <?php require_once '../particions/footer.php' ?>

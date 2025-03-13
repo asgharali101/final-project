@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../connection.php';
-$error = '';
+$errors = [];
 session_start();
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 
@@ -33,6 +33,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $description = $_POST["description"] ?? null;
     $category_id = $_POST['category_id'] ?? null;
 
+    if (empty($_POST['title']) || strlen($_POST['title']) > 100) {
+        $errors['title'] = 'title is required and must be less than 100 characters.';
+    }
+
+    if (empty($_POST['description']) || strlen($_POST['description']) > 3000) {
+        $errors['description'] = 'description is required and must be less than 3000 characters.';
+    }
+
+    if ($_FILES['feature_image']['size'] > 2 * 1024 * 1024) {
+        $errors['feature_image'] = 'Image size must be 2MB or less.';
+    }
+
     $filePath = $courses["feature_image"] ?? null;
 
     $fileName = $_FILES["feature_image"]["name"] ?? null;
@@ -40,18 +52,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION) ?? null;
     $allowedTypes = ["png", "jpeg", "jpg"];
 
-    if (in_array($fileExtension, $allowedTypes)) {
-        $filePath = "../../uploads/" . $newName . "." . $fileExtension;
-        if (move_uploaded_file($_FILES["feature_image"]["tmp_name"], $filePath)) {
-            if (file_exists($users["feature_image"]) && ! empty($users["feature_image"])) {
-                unlink($courses["feature_image"]);
+    if (empty($errors)) {
+        if (in_array($fileExtension, $allowedTypes)) {
+            $filePath = "../../uploads/" . $newName . "." . $fileExtension;
+            if (move_uploaded_file($_FILES["feature_image"]["tmp_name"], $filePath)) {
+                if (file_exists($users["feature_image"]) && ! empty($users["feature_image"])) {
+                    unlink($courses["feature_image"]);
+                }
             }
+        } else {
+            $errors['feature_image'] = 'Image type must be PNG, JPEG, JPG.';
         }
+        $addData = $conn->exec("UPDATE courses SET title ='$title', description='$description',feature_image='$filePath', category_id='$category_id', created_at=NOW()  where id=$id");
+        header('location:./user/courses.php');
     }
-    $addData = $conn->exec("UPDATE courses SET title ='$title', description='$description',feature_image='$filePath', category_id='$category_id', created_at=NOW()  where id=$id");
-    header('location:../../../../user/courses.php');
-} else {
-    $error = " All fields are required. Please fill out the missing fields";
 }
 
 ?>
@@ -136,21 +150,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="control">
                         <label class="label">Course Name</label>
                         <input type="text" name="title" value="<?= $courses["title"] ?? null ?>" placeholder="Enter course name" class="input" />
+                        <p class="text-red-500" id="message"><?php echo $errors["title"] ?? null ?></p>
+
                     </div>
 
                     <div class="control">
                         <label class="label">Course Description</label>
                         <textarea name="description" value="<?= $courses["description"] ?? null ?>" placeholder="Enter course description" class="textarea"><?= $courses["description"] ?? null ?></textarea>
+                        <p class="text-red-500" id="message"><?php echo $errors["description"] ?? null ?></p>
+
                     </div>
 
                     <div class="flex items-center justify-start w-48 h-48 image">
                         <img
                             src="<?php echo $courses['feature_image'] ?? null ?>"
                             class="h-32 rounded-full w-36" />
+
                     </div>
                     <div class="control">
                         <label class="label">feature_image</label>
-                        <input type="file" name="feature_image" class="input" />
+                        <input type="file" name="feature_image" accept="" class="input" />
+                        <p class="text-red-500" id="message"><?php echo $errors["feature_image"] ?? null ?></p>
+
                     </div>
 
                     <div class="">

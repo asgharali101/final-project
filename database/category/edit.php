@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../connection.php';
-$error = '';
+$errors = [];
 session_start();
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 if ($priviousEmail === null) {
@@ -25,9 +25,14 @@ $categories = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (isset($_POST['category'])) {
     $category = $_POST['category'] ?? null;
+    if (empty($_POST['category']) || strlen($_POST['category']) > 30) {
+        $errors['category'] = 'category is required and must be less than 30 characters.';
+    }
+    if (empty($errors)) {
 
-    $addData = $conn->exec("UPDATE categories SET name ='$category'  where id=$id");
-    header('location:../../../../user/category.php');
+        $addData = $conn->exec("UPDATE categories SET name ='$category'  where id=$id");
+        header('location:../../../../user/category.php');
+    }
 }
 
 ?>
@@ -126,6 +131,8 @@ if (isset($_POST['category'])) {
                                         value="<?= $categories['name'] ?? null ?>"
                                         class="input"
                                         required />
+                                    <p class="text-red-500" id="message"><?php echo $errors["category"] ?? null ?></p>
+
                                 </div>
                                 <p class="help">Required. Your categories</p>
                             </div>

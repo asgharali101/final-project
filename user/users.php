@@ -109,7 +109,7 @@ if ($role_id == 1) {
 
 
         <?php
-        if (count($users) > 0) { ?>
+        if ($role_id != null) { ?>
             <section class="section main-section">
                 <div class="notification blue">
                     <div
@@ -135,11 +135,14 @@ if ($role_id == 1) {
                             ?>
                         </p>
                         <?php if ($role_id == 1) { ?>
-                            <form action="./download-data.php">
-                                <button class="px-4 py-2 mx-2 mt-6 mb-4 text-white rounded-lg shadow-md button green">
-                                    Download data
-                                </button>
-                            </form>
+                            <div class="flex items-center space-x-9">
+                                <form action="./download-data.php">
+                                    <button class="px-4 py-2 mx-2 mt-6 mb-4 text-white rounded-lg shadow-md button green">
+                                        Download data
+                                    </button>
+                                </form>
+                                <a href="../database/user/adduser.php" class="px-4 py-2 mx-2 mt-6 mb-4 text-white rounded-lg shadow-md button green">Add User</a>
+                            </div>
                         <?php } ?>
                     </header>
                     <?php if (count($users) != 0) { ?>

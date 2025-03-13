@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../connection.php';
-$error = '';
+$errors = [];
 session_start();
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 if ($priviousEmail == null) {
@@ -19,6 +19,11 @@ if ($users["role_id"] != 1) {
 
 if (isset($_POST['category'])) {
     $category = $_POST['category'] ?? null;
-    $addData = $conn->exec("INSERT INTO categories(name) value('$category')");
-    header('location:../../../../user/category.php');
+    if (empty($_POST['category']) || strlen($_POST['email']) > 40) {
+        $errors['category'] = 'category is required and must be less than 40 characters.';
+    }
+    if (empty($errors)) {
+        $addData = $conn->exec("INSERT INTO categories(name) value('$category')");
+        header('location:../../../../user/category.php');
+    }
 }

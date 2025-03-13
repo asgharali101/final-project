@@ -6,8 +6,7 @@ session_start();
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 
 if ($priviousEmail === null) {
-    header('location:../../index.html');
-    exit;
+    header('location:../../index.php');
 }
 
 $roleStmt = $conn->query("SELECT * from users WHERE email='$priviousEmail'");

@@ -2,12 +2,14 @@
 
 require_once '../../connection.php';
 session_start();
-$error = '';
+$currentEmail = $_SESSION["user"]["email"] ?? null;
+if ($currentEmail != null) {
+  header("location:../../index.php");
+}
+$errors = [];
 $stmt = $conn->query('SELECT * from roles');
 $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// var_dump($roles);
-// exit;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $firstName = $_POST['first_name'] ?? null;
@@ -16,7 +18,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $password = password_hash($_POST['password'], PASSWORD_DEFAULT) ?? null;
   $date_of_birth = $_POST['date_of_birth'] ?? null;
   $address = $_POST['address'] ?? null;
-  $role_id = 3 ?? null;
+  $role_id = 3;
+
+  if (empty($_POST['first_name']) || strlen($_POST['first_name']) > 20) {
+    $errors['first_name'] = 'First name is required and must be less than 20 characters.';
+  }
+
+  if (empty($_POST['last_name']) || strlen($_POST['last_name']) > 20) {
+    $errors['last_name'] = 'Last name is required and must be less than 20 characters.';
+  }
+
+  if (empty($_POST['email']) || strlen($_POST['email']) > 40) {
+    $errors['email'] = 'Email is required and must be less than 40 characters.';
+  }
+
+  if (empty($_POST['password']) || strlen($_POST['password']) > 30) {
+    $errors['password'] = 'Password is required and must be less than 30 characters.';
+  }
+
+  if (empty($_POST['address']) || strlen($_POST['address']) > 500) {
+    $errors['address'] = 'address is required and must be less than 500 characters.';
+  }
+
+  if (!DateTime::createFromFormat('Y-m-d', $date_of_birth)) {
+    $errors['date_of_birth'] = ' invalid date_of_birth';
+  }
+
+
+  if ($_FILES['image']['size'] > 2 * 1024 * 1024) {
+    $errors['image'] = 'Image size must be 2MB or less.';
+  }
 
   $filename = $_FILES['image']['name'];
   $fileType = pathinfo($filename, PATHINFO_EXTENSION);
@@ -25,20 +56,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $stmt = $conn->query("SELECT * from users where email='$email'");
   $result = $stmt->fetch(PDO::FETCH_OBJ);
   if ($result) {
-    $error = 'Email already be use' ?? null;
+    $errors["email"] = 'Email already be use';
   } else {
-    if (in_array($fileType, $allowedTypes)) {
+    if (! in_array(strtolower($fileType), $allowedTypes)) {
+      $errors["image"] = "Only images are allowed MP4 or other files are not allowed.";
+    } else {
       $filePath = '../../uploads/' . $filename;
       move_uploaded_file($_FILES['image']['tmp_name'], $filePath);
     }
-    $_SESSION['user'] = [
-      'first_name' => $firstName,
-      'last_name' => $lastName,
-      'email' => $email,
-      'role_id' => $role_id,
-    ];
-    $addData = $conn->exec("INSERT INTO users(role_id,first_name,last_name,email,password,date_of_birth,image_path,address) value($role_id,'$firstName','$lastName','$email','$password','$date_of_birth','$filePath','$address')");
-    header('location:../../index.html');
+
+    if (empty($errors)) {
+      $_SESSION['user'] = [
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'email' => $email,
+        'role_id' => $role_id,
+      ];
+      $addData = $conn->exec("INSERT INTO users(role_id,first_name,last_name,email,password,date_of_birth,image_path,address) value($role_id,'$firstName','$lastName','$email','$password','$date_of_birth','$filePath','$address')");
+      header('location:../../index.html');
+    }
   }
 }
 
@@ -133,17 +169,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     name="first_name"
                     value="<?php echo $_POST["first_name"] ?? null ?>"
                     placeholder="asghar"
-                    autocomplete="username" />
+                    autocomplete="username" required />
                   <span class="icon is-small left"><i class="mdi mdi-account"></i></span>
 
                 </div>
                 <p class="help">Please enter your Name</p>
+                <p class="text-red-500" id="message"><?php echo $errors["first_name"] ?? null ?></p>
               </div>
 
               <div class="field spaced">
                 <label class="label">last Name</label>
                 <div class="control icons-left">
-                  <input
+                  <input required
                     class="input"
                     type="text"
                     name="last_name"
@@ -153,31 +190,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <span class="icon is-small left"><i class="mdi mdi-account"></i></span>
                 </div>
                 <p class="help">Please enter your last Name</p>
+                <p class="text-red-500" id="message"><?php echo $errors["last_name"] ?? null ?></p>
+
               </div>
             </div>
 
             <div class="field spaced">
               <label class="label">email</label>
               <div class="control icons-left">
-                <input
+                <input required
                   class="input"
                   type="text"
                   name="email"
                   value="<?php echo $_POST["email"] ?? null ?>"
                   placeholder="user@example.com"
                   autocomplete="username" />
-                <?php echo "<p style='color:red;'>$error</p>";
-                ?>
+
                 <span class="icon is-small left"><i class="mdi mdi-email"></i></span>
 
               </div>
               <p class="help">Please enter your email</p>
+              <p class="text-red-500" id="message"><?php echo $errors["email"] ?? null ?></p>
+
             </div>
 
             <div class="field spaced">
               <label class="label">Password</label>
               <p class="control icons-left">
-                <input
+                <input required
                   class="input"
                   type="password"
                   name="password"
@@ -187,12 +227,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="icon is-small left"><i class="mdi mdi-lock"></i></span>
               </p>
               <p class="help">Please enter your password</p>
+              <p class="text-red-500" id="message"><?php echo $errors["password"] ?? null ?></p>
+
             </div>
 
             <div class="field spaced">
               <label class="label">Date_Of_Birth</label>
               <p class="control icons-left">
-                <input
+                <input required
                   class="input"
                   type="date"
                   name="date_of_birth"
@@ -202,6 +244,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="icon is-small left"><i class="mdi mdi-calculator"></i></span>
               </p>
               <p class="help">Please enter your date of birth</p>
+              <p class="text-red-500" id="message" id="message"><?php echo $errors["date_of_birth"] ?? null ?></p>
+
             </div>
 
             <!-- <div class="field spaced">
@@ -242,8 +286,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   class="textarea"
                   name="address"
                   value="<?php echo $_POST["address"] ?? null ?>"
-                  placeholder="Enter your address here"><?php echo $_POST["address"] ?? null ?>"</textarea>
+                  placeholder="Enter your address here"><?php echo $_POST["address"] ?? null ?></textarea>
               </div>
+              <p class="text-red-500" id="message" id="message"><?php echo $errors["address"] ?? null ?></p>
+
               <p class="help">Please enter your Address</p>
             </div>
 
@@ -251,13 +297,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="field spaced">
               <label class="label">Upload File</label>
               <div class="control">
-                <input
+                <input required
                   class="w-full border border-gray-400 rounded-md file:border-0 file:rounded-lg file:px-4 file:py-2"
                   type="file"
                   name="image"
-                  accept="image/*, .pdf, .docx, .xlsx" />
+                  accept="image/*, .jpg, .jpeg, .png" />
               </div>
               <p class="help">Please upload a file (image, PDF, or document)</p>
+              <p class="text-red-500" id="message"><?php echo $errors["image"] ?? null ?></p>
             </div>
 
             <!-- <div class="field spaced">

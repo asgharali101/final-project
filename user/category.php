@@ -17,6 +17,21 @@ $role_id = $users['role_id'] ?? null;
 $categoryStmt = $conn->query('SELECT * FROM categories');
 $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
 
+if ($role_id != 1) {
+    header("location:../../error.php");
+}
+
+if (isset($_POST['category'])) {
+    $errors = [];
+    $category = $_POST['category'] ?? null;
+    if (empty($_POST['category']) || strlen($_POST['category']) > 30) {
+        $errors['category'] = 'category is required and must be less than 30 characters.';
+    }
+    if (empty($errors)) {
+        $addData = $conn->exec("INSERT INTO categories(name) value('$category')");
+        header('location:../../../../user/category.php');
+    }
+}
 
 ?>
 
@@ -109,7 +124,7 @@ $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
                     </p>
                 </header>
                 <div class="card-content">
-                    <form method="POST" action="../database/category/add.php">
+                    <form method="POST" action="">
 
                         <div class="control">
                             <label class="label">New Category</label>
@@ -127,6 +142,7 @@ $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
                                     value="<?php echo $_POST["category"] ?? null ?>"
                                     placeholder="Enter category name"
                                     class="pl-10 input" />
+                                <p class="text-red-500"><?php echo $errors["category"] ?? null ?></p>
                             </div>
                         </div>
 
@@ -142,62 +158,73 @@ $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
         <?php } ?>
 
 
-        <section class="pt-0 section main-section">
-            <div class="card has-table">
-                <header class="card-header">
-                    <p class="card-header-title">
-                        <span class="icon"><i class="mdi mdi-buffer"></i></span>
-                        Categories
-                    </p>
-                </header>
-                <?php if (count($categories) != 0) { ?>
-                    <div class="overflow-x-auto ">
-                        <table class="w-full table-auto">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-2">ID</th>
-                                    <th class="px-4 py-2">Name</th>
-                                    <?php if ($role_id == 1) { ?>
-                                        <th class="px-4 py-2 text-left">Actions</th>
-                                    <?php } ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($categories as $category) { ?>
-                                    <tr class="">
-                                        <td class="px-4 py-2 border"><?= $category['id'] ?? '' ?></td>
-                                        <td class="px-4 py-2 border"><?= $category['name'] ?? '' ?></td>
+        <?php if ($role_id == 1 || $role_id == 2) { ?>
+            <section class="pt-0 section main-section">
+                <div class="card has-table">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <span class="icon"><i class="mdi mdi-buffer"></i></span>
+                            Categories
+                        </p>
+                    </header>
+                    <?php if (count($categories) != 0) { ?>
+                        <div class="overflow-x-auto ">
+                            <table class="w-full table-auto">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2">ID</th>
+                                        <th class="px-4 py-2">Name</th>
                                         <?php if ($role_id == 1) { ?>
-                                            <td class="px-4 py-2 border actions-cell">
-                                                <div class="buttons">
-                                                    <a href="../database/category/edit.php?id=<?= $category['id'] ?>"
-                                                        class="button small green">
-                                                        <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                                                    </a>
-                                                    <a href="../database/category/delete.php?id=<?= $category['id'] ?>"
-                                                        class="button small red">
-                                                        <span class="icon"><i class="mdi mdi-trash-can"></i></span>
-                                                    </a>
-                                                </div>
-                                            </td>
+                                            <th class="px-4 py-2 text-left">Actions</th>
                                         <?php } ?>
                                     </tr>
-                                <?php } ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php } else { ?>
-                    <div class="card empty">
-                        <div class="card-content">
-                            <div>
-                                <span class="icon large"><i class="mdi mdi-emoticon-sad mdi-48px"></i></span>
-                            </div>
-                            <p>No category found here…</p>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($categories as $category) { ?>
+                                        <tr class="">
+                                            <td class="px-4 py-2 border"><?= $category['id'] ?? '' ?></td>
+                                            <td class="px-4 py-2 border"><?= $category['name'] ?? '' ?></td>
+                                            <?php if ($role_id == 1) { ?>
+                                                <td class="px-4 py-2 border actions-cell">
+                                                    <div class="buttons">
+                                                        <a href="../database/category/edit.php?id=<?= $category['id'] ?>"
+                                                            class="button small green">
+                                                            <span class="icon"><i class="mdi mdi-pencil"></i></span>
+                                                        </a>
+                                                        <a href="../database/category/delete.php?id=<?= $category['id'] ?>"
+                                                            class="button small red">
+                                                            <span class="icon"><i class="mdi mdi-trash-can"></i></span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            <?php } ?>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
                         </div>
+                    <?php } else { ?>
+                        <div class="card empty">
+                            <div class="card-content">
+                                <div>
+                                    <span class="icon large"><i class="mdi mdi-emoticon-sad mdi-48px"></i></span>
+                                </div>
+                                <p>No category found here…</p>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            </section>
+        <?php } else { ?>
+            <div class="card empty">
+                <div class="card-content">
+                    <div>
+                        <span class="icon large"><i class="mdi mdi-emoticon-sad mdi-48px"></i></span>
                     </div>
-                <?php } ?>
+                    <p>Nothing's here…</p>
+                </div>
             </div>
-        </section>
+        <?php } ?>
 
     </div>
 

@@ -1,7 +1,8 @@
 <?php
 require_once '../connection.php';
-ob_start();
 session_start();
+require_once "../database/user/edit.php";
+
 
 $email = $_SESSION['user']['email'] ?? null;
 
@@ -43,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en" class="">
@@ -146,17 +146,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
           </header>
           <div class="card-content">
-            <form action="../database/user/edit.php" method="POST" enctype="multipart/form-data">
+            <form action="" method="POST" enctype="multipart/form-data">
               <div class="field">
                 <div class="mx-auto w-[1rem] h-04">
 
                 </div>
                 <label class="label">Avatar</label>
-                <div class="field-body">
-                  <div class="field file">
-                    <label class="upload control">
-                      <a class="button blue"> Upload </a>
+                <div class="">
+                  <div class="">
+                    <label class="">
                       <input type="file" name="newImage" />
+                      <p class="text-red-500"><?php echo $errors["newImage"] ?? null ?></p>
+
                     </label>
                   </div>
                 </div>
@@ -175,6 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           value="<?= $currentUser['first_name'] ?? null ?>"
                           class="input"
                           required />
+                        <p class="text-red-500" id="message"><?php echo $errors["first_name"] ?? null ?></p>
                       </div>
                       <p class="help">Required. Your first name</p>
                     </div>
@@ -193,6 +195,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           value="<?= $currentUser['last_name'] ?? null ?>"
                           class="input"
                           required />
+                        <p class="text-red-500" id="message"><?php echo $errors["last_name"] ?? null ?></p>
+
                       </div>
                       <p class="help">Required. Your last name</p>
                     </div>
@@ -212,6 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         value="<?= $currentUser['email'] ?? null ?>"
                         class="input"
                         required />
+                      <p class="text-red-500" id="message"><?php echo $errors["email"] ?? null ?></p>
+
                     </div>
                     <p class="help">Required. Your e-mail</p>
                   </div>
@@ -219,19 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
 
               <div class="flex justify-between field">
-                <div class="control">
-                  <label class="label">role_id</label>
 
-                  <input
-                    readonly
-                    type="text"
-                    name="role_id"
-                    value="<?php
-                            echo $currentUser['role_id'];
-                            ?>"
-                    class="input is-static" />
-
-                </div>
                 <div class="control">
                   <label class="label">Date Of Birth</label>
                   <input required
@@ -239,6 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     name="date_of_birth"
                     value="<?php echo $currentUser['date_of_birth'] ?>"
                     class="input is-static" />
+                  <p class="text-red-500" id="message"><?php echo $errors["date_of_birth"] ?? null ?></p>
+
                 </div>
               </div>
 
@@ -249,6 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </label>
                 <div class="control">
                   <textarea required name="address" class="input is-static"><?= $currentUser['address'] ?? null ?></textarea>
+                  <p class="text-red-500" id="message"><?php echo $errors["address"] ?? null ?></p>
 
                 </div>
               </div>
@@ -315,14 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
             </div>
             <div class="flex justify-between field">
-              <div class="control">
-                <label class="label">role_id</label>
-                <input
-                  type="text"
-                  readonly
-                  value="<?php echo $currentUser['role_id'] ?? ''; ?>"
-                  class="input is-static" />
-              </div>
+
               <div class="control">
                 <label class="label">Date Of Birth</label>
 

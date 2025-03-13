@@ -1,5 +1,6 @@
 <?php
 require_once '../connection.php';
+require_once "../database/topics/add.php";
 session_start();
 $id = $_GET["id"] ?? null;
 if ($id == null) {
@@ -14,8 +15,11 @@ if ($userEmail == null) {
 }
 $currentUser = $conn->query("SELECT * from users where email='$userEmail'")->fetch(PDO::FETCH_ASSOC);
 
-$role_id = $currentUser["role_id"] ?? null;
+$role_id = $currentUser["role_id"];
 
+if ($role_id != 1 && $role_id != 2) {
+    header("location:../error.php");
+}
 
 $topicStmt = $conn->query("SELECT * from topics where course_id=$id");
 $topics = $topicStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -29,7 +33,6 @@ $topicsTitle = $Stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $currentTopic = null;
 ?>
-
 
 
 <!DOCTYPE html>
@@ -234,7 +237,7 @@ $currentTopic = null;
                         </h2>
                     </header>
                     <div class="min-h-screen p-6 ">
-                        <form method="POST" action="../database/topics/add.php" enctype="multipart/form-data" class="space-y-6">
+                        <form method="POST" action="" enctype="multipart/form-data" class="space-y-6">
                             <!-- Topic Title -->
                             <div>
                                 <label for="title" class="block mb-2 font-semibold text-gray-300">Topic Title</label>
@@ -246,6 +249,8 @@ $currentTopic = null;
                                     placeholder="Enter topic title"
                                     class="w-full p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required />
+                                <p class="text-red-500" id="message"><?php echo $errors["title"] ?? null ?></p>
+
                             </div>
 
                             <!-- Topic Description -->
@@ -256,6 +261,8 @@ $currentTopic = null;
                                     name="description"
                                     placeholder="Enter topic description"
                                     class="w-full h-32 p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo $_POST["description"] ?? null ?></textarea>
+                                <p class="text-red-500" id="message"><?php echo $errors["description"] ?? null ?></p>
+
                             </div>
 
                             <!-- Topic Content -->
@@ -268,6 +275,8 @@ $currentTopic = null;
                                     value="<?php echo $_POST["content"] ?? null ?>"
                                     placeholder="Enter content"
                                     class="w-full p-3 text-gray-200 placeholder-gray-500 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <p class="text-red-500" id="message"><?php echo $errors["content"] ?? null ?></p>
+
                             </div>
 
                             <!-- Video File -->
@@ -278,6 +287,8 @@ $currentTopic = null;
                                     type="file"
                                     name="video_path"
                                     class="w-full p-3 text-gray-200 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <p class="text-red-500" id="message"><?php echo $errors["video_path"] ?? null ?></p>
+
                             </div>
 
                             <!-- Attachment File -->
@@ -288,6 +299,8 @@ $currentTopic = null;
                                     type="file"
                                     name="attachment_path"
                                     class="w-full p-3 text-gray-200 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <p class="text-red-500" id="message"><?php echo $errors["attachment_path"] ?? null ?></p>
+
                             </div>
 
                             <!-- Course Selection -->
@@ -360,7 +373,7 @@ $currentTopic = null;
             if (messageDiv) {
                 messageDiv.style.display = 'none';
             }
-        }, 10000);
+        }, 20000);
     </script>
 
     <script>

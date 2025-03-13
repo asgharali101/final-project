@@ -1,11 +1,10 @@
 <?php
 
 require_once '../connection.php';
-$error = '';
+$error = [];
 session_start();
 
 $priviousEmail = $_SESSION['user']['email'] ?? null;
-
 
 $stmt = $conn->query("SELECT * from users where email ='$priviousEmail'");
 $previousUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -39,33 +38,63 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
     $address = $_POST['address'] ?? null;
     $role_id = $_POST['role_id'] ?? null;
 
+
+    if (empty($_POST['first_name']) || strlen($_POST['first_name']) > 20) {
+        $errors['first_name'] = 'First name is required and must be less than 20 characters.';
+    }
+
+    if (empty($_POST['last_name']) || strlen($_POST['last_name']) > 20) {
+        $errors['last_name'] = 'Last name is required and must be less than 20 characters.';
+    }
+
+    if (empty($_POST['email']) || strlen($_POST['email']) > 40) {
+        $errors['email'] = 'Email is required and must be less than 40 characters.';
+    }
+
+
+    if (empty($_POST['address']) || strlen($_POST['address']) > 500) {
+        $errors['address'] = 'address is required and must be less than 500 characters.';
+    }
+
+
+
+    if (! DateTime::createFromFormat('Y-m-d', $date_of_birth)) {
+        $errors['date_of_birth'] = 'Invalid date format';
+    }
+
+    if ($_FILES['newImage']['size'] > 2 * 1024 * 1024) {
+        $errors['newImage'] = 'Image size must be 2MB or less.';
+    }
+
+
+
+
     $filename = $_FILES['newImage']['name'];
     $fileType = pathinfo($filename, PATHINFO_EXTENSION);
     $allowedTypes = ['png', 'jpeg', 'jpg'];
     $filePath = $users['image_path'];
 
-    $stmt = $conn->query("SELECT count(*) as count from users where email='$currentEmail' AND id != $id");
+    $stmt = $conn->query("SELECT * from users where email='$currentEmail' AND id != $id");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($result['count'] > 0) {
-        $error = 'Email already be use' ?? null;
-    } else {
-        if (in_array($fileType, $allowedTypes)) {
-            $filePath = '../../uploads/' . $filename;
-            if (move_uploaded_file($_FILES['newImage']['tmp_name'], $filePath)) {
-                if (! empty($user['image_path']) && file_exists($user['image_path'])) {
-                    unlink($users['image_path']);
+    if (empty($errors)) {
+        if ($result) {
+            $error = 'Email already be use' ?? null;
+        } else {
+            if (in_array($fileType, $allowedTypes)) {
+                $filePath = '../uploads/' . $filename;
+                if (move_uploaded_file($_FILES['newImage']['tmp_name'], $filePath)) {
+                    if (! empty($user['image_path']) && file_exists($user['image_path'])) {
+                        unlink($users['image_path']);
+                    }
                 }
             }
+
+
+            $addData = $conn->exec("UPDATE users SET role_id =$role_id, first_name='$firstName', last_name='$lastName', email='$email', password='$password' , date_of_birth='$date_of_birth', image_path='$filePath', address='$address'  where id=$id");
+            header('location:../../../../user/users.php');
         }
-
-
-
-        $addData = $conn->exec("UPDATE users SET role_id =$role_id, first_name='$firstName', last_name='$lastName', email='$email', password='$password' , date_of_birth='$date_of_birth', image_path='$filePath', address='$address'  where id=$id");
-        header('location:../../../../user/index.php');
     }
 }
-
 
 
 ?>
@@ -135,7 +164,6 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
 <body>
     <?php require_once '../particions/nav.php' ?>
     <?php require_once '../particions/sidebar.php' ?>
-    <p id="message"><?php echo $error ?? null ?></p>
     <!-- profile -->
     <div id="app" class="">
         <div class="card">
@@ -161,10 +189,10 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                         <hr />
                         <label class="label">Avatar</label>
                         <div class="field-body">
-                            <div class="field file">
-                                <label class="upload control">
-                                    <a class="button blue"> Upload </a>
+                            <div class="">
+                                <label class="">
                                     <input type="file" name="newImage" />
+                                    <p class="text-red-500" id="message"><?php echo $errors["newImage"] ?? null ?></p>
                                 </label>
                             </div>
                         </div>
@@ -183,6 +211,8 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                                             value="<?= $users['first_name'] ?? null ?>"
                                             class="input"
                                             required />
+                                        <p class="text-red-500" id="message"><?php echo $errors["first_name"] ?? null ?></p>
+
                                     </div>
                                     <p class="help">Required. Your first name</p>
                                 </div>
@@ -201,6 +231,8 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                                             value="<?= $users['last_name'] ?? null ?>"
                                             class="input"
                                             required />
+                                        <p class="text-red-500" id="message"><?php echo $errors["last_name"] ?? null ?></p>
+
                                     </div>
                                     <p class="help">Required. Your last name</p>
                                 </div>
@@ -220,6 +252,8 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                                         value="<?= $users['email'] ?? null ?>"
                                         class="input"
                                         required />
+                                    <p class="text-red-500" id="message"><?php echo $errors["email"] ?? null ?></p>
+
                                 </div>
                                 <p class="help">Required. Your e-mail</p>
                             </div>
@@ -255,6 +289,8 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                                 name="date_of_birth"
                                 value="<?php echo $users['date_of_birth'] ?>"
                                 class="input is-static" />
+                            <p class="text-red-500" id="message"><?php echo $errors["date_of_birth"] ?? null ?></p>
+
                         </div>
                     </div>
 
@@ -265,6 +301,7 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                         </label>
                         <div class="control">
                             <textarea required name="address" class="input is-static"><?= $users['address'] ?? null ?></textarea>
+                            <p class="text-red-500" id="message"><?php echo $errors["address"] ?? null ?></p>
 
                         </div>
                     </div>

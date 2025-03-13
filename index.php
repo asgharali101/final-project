@@ -394,9 +394,11 @@ $teacherEnrolls = $stmt->fetchALL(PDO::FETCH_ASSOC);
                             <div class="p-4 transition-all bg-white border border-gray-200 rounded-lg swiper-slide hover:scale-105 ">
                                 <!-- Course Image -->
                                 <div class="relative overflow-hidden rounded-lg aspect-w-16 aspect-h-9">
-                                    <img src="<?= $course['feature_image'] ?? 'https://via.placeholder.com/300x200' ?>"
-                                        class="object-cover w-full h-40 rounded-lg"
-                                        alt="Course thumbnail">
+                                    <a href="./user/topics.php?id=<?php echo $course["id"] ?? null ?>">
+                                        <img src="<?= $course['feature_image'] ?? 'https://via.placeholder.com/300x200' ?>"
+                                            class="object-cover w-full h-40 rounded-lg"
+                                            alt="Course thumbnail">
+                                    </a>
                                     <!-- Category Badge -->
                                     <span class="absolute px-3 py-1 text-xs font-bold text-gray-800 bg-white border border-gray-300 rounded-full shadow-md top-3 left-3">
                                         <?= $course['category_name'] ?? 'Uncategorized' ?>
@@ -422,7 +424,7 @@ $teacherEnrolls = $stmt->fetchALL(PDO::FETCH_ASSOC);
 
                                     <!-- Title -->
                                     <h6 class="area-title font-bold !text-xl group-hover/course:text-primary pt-3 pb-3 leading-9 text-black transition hover:text-blue-600 hover:text-primary">
-                                        <a href="./topics.php?id=<?php echo $course["id"] ?? null ?>"
+                                        <a href="./user/topics.php?id=<?php echo $course["id"] ?? null ?>"
                                             class="line-clamp-2" aria-label="Course title">
                                             <?= $course['title'] ?? 'Untitled Course' ?>
                                         </a>
@@ -937,9 +939,12 @@ $teacherEnrolls = $stmt->fetchALL(PDO::FETCH_ASSOC);
                                     class="flex flex-col bg-white rounded-2xl h-full p-5 group-data-[card-layout=list]:flex-row [&.card-border]:border [&.card-border]:border-border [&.card-border]:hover:shadow-md custom-transition group/course ">
                                     <!-- COURSE THUMBNAIL -->
                                     <div class="relative overflow-hidden aspect-video rounded-xl">
-                                        <img data-src="<?php echo $course["feature_image"] ?? null ?>"
-                                            class="w-full h-64 duration-300 hover:text-primary course-grid-thumb-img group-hover/topCourse:scale-110"
-                                            alt="Course thumbnail">
+                                        <a href="./user/topics.php?id=<?php echo $course["id"] ?? null ?>">
+
+                                            <img data-src="<?php echo $course["feature_image"] ?? null ?>"
+                                                class="w-full h-64 duration-300 hover:text-primary course-grid-thumb-img group-hover/topCourse:scale-110"
+                                                alt="Course thumbnail">
+                                        </a>
                                         <!-- badge -->
                                         <span
                                             class="badge b-solid badge-secondary-solid rounded-full !text-heading dark:text-white absolute top-4 left-4 rtl:left-auto rtl:right-4 z-10">Expert
@@ -956,7 +961,7 @@ $teacherEnrolls = $stmt->fetchALL(PDO::FETCH_ASSOC);
                                             </div>
                                         </div>
                                         <h6 class="area-title font-bold !text-xl group-hover/course:text-primary pt-3 pb-3 leading-9 text-black transition hover:text-blue-600 hover:text-primary">
-                                            <a href="./topics.php?id=<?php echo $course["id"] ?? null ?>"
+                                            <a href="./user/topics.php?id=<?php echo $course["id"] ?? null ?>"
                                                 class=" line-clamp-2" aria-label="Course title">
                                                 <?= $course['title'] ?? 'Untitled Course' ?>
                                             </a>

@@ -38,6 +38,26 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
         $content = $_POST['content'] ?? null;
         $course_id = $_POST['course_id'] ?? null;
 
+        if (empty($_POST['title']) || strlen($_POST['title']) > 100) {
+            $errors['title'] = 'title is required and must be less than 100 characters.';
+        }
+
+        if (empty($_POST['description']) || strlen($_POST['description']) > 3000) {
+            $errors['description'] = 'description is required and must be less than 3000 characters.';
+        }
+
+        if (empty($_POST['content']) || strlen($_POST['content']) > 3000) {
+            $errors['content'] = 'description is required and must be less than 3000 characters.';
+        }
+
+        if ($_FILES['attachment_path']['size'] > 2 * 1024 * 1024) {
+            $errors['attachment_path'] = 'attachment size must be 2MB or less.';
+        }
+
+        if ($_FILES['video_path']['size'] > 10 * 1024 * 1024) {
+            $errors['video_path'] = 'video size must be 10MB or less.';
+        }
+
         $videoName = $_FILES["video_path"]["name"] ?? null;
         $attachmentName = $_FILES["attachment_path"]["name"] ?? null;
 
@@ -50,31 +70,38 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
 
         $videoPath = $currentTopic["video_path"];
         $videoAllowedTypes = ["mp4", "webm",];
-        if (in_array($videoExtension, $videoAllowedTypes)) {
-            if (isset($_FILES['video_path']) && $_FILES['video_path']['error'] == 0) {
-                $videoPath = '../../uploads/' . $fileName . "." . $videoExtension;
-                if (move_uploaded_file($_FILES['video_path']['tmp_name'], $videoPath)) {
-                    unlink($currentTopic["video_path"]);
+        if (empty($errors)) {
+
+            if (in_array($videoExtension, $videoAllowedTypes)) {
+                if (isset($_FILES['video_path']) && $_FILES['video_path']['error'] == 0) {
+                    $videoPath = '../../uploads/' . $fileName . "." . $videoExtension;
+                    if (move_uploaded_file($_FILES['video_path']['tmp_name'], $videoPath)) {
+                        unlink($currentTopic["video_path"]);
+                    }
                 }
             }
-        }
 
-        $attachmentPath = $currentTopic["attachment_path"];
-        $attachmentAllowedTypes = ["pdf", "csv", "xls", "xlsx", "jpeg", "jpg", "png", "gif", "svg", "webp"];
+            $attachmentPath = $currentTopic["attachment_path"];
+            $attachmentAllowedTypes = ["pdf", "csv", "xls", "xlsx", "jpeg", "jpg", "png", "gif", "svg", "webp"];
 
-        if (in_array($attachmentExtension, $attachmentAllowedTypes)) {
-            if (isset($_FILES['attachment_path']) && $_FILES['attachment_path']['error'] == 0) {
-                $attachmentPath = '../../uploads/' . $fileName . "." . $attachmentExtension;
-                if (move_uploaded_file($_FILES['attachment_path']['tmp_name'], $attachmentPath)) {
-                    unlink($currentTopic["attachment_path"]);
+            if (! in_array($attachmentExtension, $attachmentAllowedTypes)) {
+                if (isset($_FILES['attachment_path']) && $_FILES['attachment_path']['error'] == 0) {
+                    $attachmentPath = '../../uploads/' . $fileName . "." . $attachmentExtension;
+                    if (move_uploaded_file($_FILES['attachment_path']['tmp_name'], $attachmentPath)) {
+                        unlink($currentTopic["attachment_path"]);
+                    }
                 }
+            } else {
+                $errors['attachment_path'] = 'attachment extension type must be pdf, csv, xls, xlsx, jpeg, jpg, png, gif, svg,webp';
             }
-        }
 
+            // if (empty($errors)) {
 
-        $query = $conn->exec("UPDATE topics SET title = '$title', description = '$description', content = '$content', video_path = '$videoPath', attachment_path = '$attachmentPath', created_at = NOW(), course_id = $course_id WHERE id = $id");
-        if ($query) {
-            header("location:../../../../user/topics.php");
+            $query = $conn->exec("UPDATE topics SET title = '$title', description = '$description', content = '$content', video_path = '$videoPath', attachment_path = '$attachmentPath', created_at = NOW(), course_id = $course_id WHERE id = $id");
+            if ($query) {
+                header("location:../../../../user/topics.php");
+            }
+            // }
         }
     }
 
@@ -132,6 +159,8 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
                                 placeholder="Enter topic title"
                                 class="p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required />
+                            <p class="text-red-500" id="message"><?php echo $errors["title"] ?? null ?></p>
+
                         </div>
 
                         <div class="flex flex-col">
@@ -140,7 +169,9 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
                                 id="description"
                                 name="description"
                                 placeholder="Enter topic description"
-                                class="h-32 p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?= $currentTopic['title'] ?? null; ?></textarea>
+                                class="h-32 p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?= $currentTopic['description'] ?? null; ?></textarea>
+                            <p class="text-red-500" id="message"><?php echo $errors["description"] ?? null ?></p>
+
                         </div>
 
                         <!-- Topic Content -->
@@ -150,9 +181,11 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
                                 id="content"
                                 type="text"
                                 name="content"
-                                value="<?= $currentTopic['title'] ?? null; ?>"
+                                value="<?= $currentTopic['content'] ?? null; ?>"
                                 placeholder="Enter content"
                                 class="p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <p class="text-red-500" id="message"><?php echo $errors["content"] ?? null ?></p>
+
                         </div>
 
                         <!-- Video File Upload -->
@@ -163,8 +196,11 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
                                 type="file"
                                 name="video_path"
                                 class="p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <p class="text-red-500" id="message"><?php echo $errors["video_path"] ?? null ?></p>
+
                             <video width="700" controls class="py-2 rounded-lg">
                                 <source src="<?= $currentTopic["video_path"] ?>" type="video/mp4">
+
                             </video>
                         </div>
 
@@ -176,6 +212,8 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
                                 type="file"
                                 name="attachment_path"
                                 class="p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <p class="text-red-500" id="message"><?php echo $errors["attachment_path"] ?? null ?></p>
+
                             <img class="w-full h-64 rounded-lg" src="<?php echo $currentTopic["attachment_path"] ?? null ?>" alt="">
                         </div>
 

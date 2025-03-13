@@ -2,11 +2,13 @@
 
 require_once '../../connection.php';
 session_start();
-$error = '';
+$error = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $login = $_POST['login'] ?? null;
   $password = $_POST['password'] ?? null;
+
+
 
   $stmt = $conn->query("SELECT * from users where email='$login'");
   $result = $stmt->fetch(PDO::FETCH_OBJ);
@@ -20,8 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     header('location:../../index.html');
-  } else {
-    $error = 'incorrect email or password';
   }
 }
 
@@ -96,7 +96,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <section class="section main-section">
       <div class="card">
-        <p class="text-center text-red-500"><?php echo $error ?></p>
 
         <header class="card-header">
           <p class="card-header-title">
