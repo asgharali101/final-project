@@ -4,6 +4,7 @@ $email = $_SESSION['user']['email'] ?? null;
 $stmt = $conn->query("SELECT * FROM users WHERE email='$email'");
 $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$image = '../'.$currentUser['image_path'];
 ?>
 
 
@@ -42,7 +43,7 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
     <div class="navbar-end">
 
       <div class="navbar-item dropdown has-divider">
-        <a class="navbar-link" href="../index.php">
+        <a class="navbar-link" href="/index.php">
           <span class="icon"><i class="mdi mdi-menu"></i></span>
           <span>Home</span>
           <span class="icon">
@@ -50,7 +51,7 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
           </span>
         </a>
         <div class="navbar-dropdown">
-          <a href="../index.php" class="navbar-item">
+          <a href="" class="navbar-item">
             <span class="icon"><i class="mdi mdi-account"></i></span>
             <span>Home Page</span>
           </a>
@@ -71,19 +72,19 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
       </div>
 
       <div class="navbar-item dropdown has-divider has-user-avatar">
-        <a class="navbar-link">
+        <a class="navbar-link" href="../../user/profile.php?id=<?php echo $currentUser['id'] ?? null ?> ">
           <div class="user-avatar">
             <img class="rounded-full"
-              src="<?php echo (!empty($currentUser['image_path'])
-                      ? $currentUser['image_path']
-                      : 'https://ui-avatars.com/api/?name=' . urlencode($currentUser['first_name'] ?? 'User')); ?>"
+              src="<?php echo ! empty($image)
+                      ? '../'.$image
+                      : 'https://ui-avatars.com/api/?name='.urlencode($currentUser['first_name'] ?? 'User'); ?>"
               alt="Avatar">
           </div>
           <div class="is-user-name"><span><?php echo $currentUser['first_name'] ?? 'No User' ?></span> <span><?php echo $currentUser['last_name'] ?? 'ali' ?></span> </div>
           <span class="icon"><i class="mdi mdi-chevron-down"></i></span>
         </a>
         <div class="navbar-dropdown">
-          <a href="../user/profile.php?id=<?php echo $currentUser['id'] ?? null ?> " class="navbar-item">
+          <a href="../../user/profile.php?id=<?php echo $currentUser['id'] ?? null ?> " class="navbar-item">
             <span class="icon"><i class="mdi mdi-account"></i></span>
             <span>My Profile</span>
           </a>

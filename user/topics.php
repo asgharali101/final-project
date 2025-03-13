@@ -14,15 +14,30 @@ if ($userEmail == null) {
     exit;
 }
 $currentUser = $conn->query("SELECT * from users where email='$userEmail'")->fetch(PDO::FETCH_ASSOC);
+$user_id = $currentUser["id"];
 
 $role_id = $currentUser["role_id"];
 
-if ($role_id != 1 && $role_id != 2) {
-    header("location:../error.php");
+// if ($role_id != 1 && $role_id != 2) {
+//     header("location:../error.php");
+// }
+
+if ($role_id == 1 || $role_id == 2) {
+    $topicStmt = $conn->query("SELECT * from topics where course_id=$id");
+    $topics = $topicStmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $currentEnrollUser = $conn->query("SELECT * FROM enrollments WHERE user_id = $user_id AND course_id = $id AND is_active=1")->fetch(PDO::FETCH_ASSOC);
+
+    if (! $currentEnrollUser) {
+        header("location:../error.php");
+        exit;
+    } else {
+        $topicStmt = $conn->query("SELECT * from topics where course_id=$id");
+        $topics = $topicStmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
-$topicStmt = $conn->query("SELECT * from topics where course_id=$id");
-$topics = $topicStmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 $courseStmt = $conn->query('SELECT * from courses');
 $courses = $courseStmt->fetchAll(PDO::FETCH_ASSOC);

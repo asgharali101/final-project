@@ -37,6 +37,7 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
     $date_of_birth = $_POST['date_of_birth'] ?? null;
     $address = $_POST['address'] ?? null;
     $role_id = $_POST['role_id'] ?? null;
+    $is_active = $_POST["is_active"];
 
 
     if (empty($_POST['first_name']) || strlen($_POST['first_name']) > 20) {
@@ -57,9 +58,16 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
     }
 
 
+    $date_of_birth_obj = DateTime::createFromFormat('Y-m-d', $date_of_birth);
+    $today = new DateTime();
+    $min_age_date = (new DateTime())->modify('-10 years');
 
-    if (! DateTime::createFromFormat('Y-m-d', $date_of_birth)) {
-        $errors['date_of_birth'] = 'Invalid date format';
+    if (!$date_of_birth_obj || $date_of_birth_obj->format('Y-m-d') !== $date_of_birth) {
+        $errors['date_of_birth'] = 'Invalid date format (use YYYY-MM-DD).';
+    } elseif ($date_of_birth_obj > $today) {
+        $errors['date_of_birth'] = 'Date of birth cannot be in the future.';
+    } elseif ($date_of_birth_obj > $min_age_date) {
+        $errors['date_of_birth'] = 'You must be at least 10 years old.';
     }
 
     if ($_FILES['newImage']['size'] > 2 * 1024 * 1024) {
@@ -68,33 +76,39 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
 
 
 
-
     $filename = $_FILES['newImage']['name'];
     $fileType = pathinfo($filename, PATHINFO_EXTENSION);
     $allowedTypes = ['png', 'jpeg', 'jpg'];
-    $filePath = $users['image_path'];
 
-    $stmt = $conn->query("SELECT * from users where email='$currentEmail' AND id != $id");
+    if (! empty($filename)) {
+        if (! in_array($fileType, $allowedTypes)) {
+            $errors['newImage'] = 'Image extension type must be png, jpeg, jpg.';
+        }
+    } else {
+        $filePath = $users['image_path'];
+    }
+
+    $stmt = $conn->query("SELECT count(*) as count from users where email='$email' AND id != $id");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result["count"] > 0) {
+        $errors["email"] = 'Email already be use';
+    }
+
     if (empty($errors)) {
-        if ($result) {
-            $error = 'Email already be use' ?? null;
-        } else {
-            if (in_array($fileType, $allowedTypes)) {
-                $filePath = '../uploads/' . $filename;
-                if (move_uploaded_file($_FILES['newImage']['tmp_name'], $filePath)) {
-                    if (! empty($user['image_path']) && file_exists($user['image_path'])) {
-                        unlink($users['image_path']);
-                    }
+        if (! empty($filename)) {
+            $filePath = '../uploads/' . $filename;
+            if (move_uploaded_file($_FILES['newImage']['tmp_name'], $filePath)) {
+                if (! empty($user['image_path']) && file_exists($user['image_path'])) {
+                    unlink($users['image_path']);
                 }
             }
-
-
-            $addData = $conn->exec("UPDATE users SET role_id =$role_id, first_name='$firstName', last_name='$lastName', email='$email', password='$password' , date_of_birth='$date_of_birth', image_path='$filePath', address='$address'  where id=$id");
-            header('location:../../../../user/users.php');
         }
+        $addData = $conn->exec("UPDATE users SET role_id =$role_id, first_name='$firstName', last_name='$lastName', email='$email', password='$password' , date_of_birth='$date_of_birth', image_path='$filePath', address='$address', is_active=$is_active  where id=$id");
+        header('location:../../../../user/users.php');
     }
 }
+
 
 
 ?>
@@ -290,6 +304,18 @@ if (isset($_POST['submit']) && ! empty($_POST['email']) && ! empty($_POST['role_
                                 value="<?php echo $users['date_of_birth'] ?>"
                                 class="input is-static" />
                             <p class="text-red-500" id="message"><?php echo $errors["date_of_birth"] ?? null ?></p>
+
+                        </div>
+                        <div class="control">
+                            <label class="label">Status</label>
+                            <select
+                                class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md"
+                                name="is_active"
+                                id="is_active">
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+
 
                         </div>
                     </div>

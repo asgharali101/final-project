@@ -73,9 +73,13 @@ if ($role_id == 1) {
     <meta
         property="twitter:description"
         content="Admin One - free Tailwind dashboard" />
-
+    <meta
+        property="twitter:image:src"
+        content="https://justboil.me/images/one-tailwind/repository-preview-hi-res.png" />
     <meta property="twitter:image:width" content="1920" />
     <meta property="twitter:image:height" content="960" />
+    <link href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script
@@ -91,9 +95,18 @@ if ($role_id == 1) {
         gtag("config", "UA-130795909-1");
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
 
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
 </head>
 
 <body>

@@ -202,6 +202,14 @@ $url = basename($_SERVER['REQUEST_URI']);
               </option>
             </select>
           </form>
+          <a href="./user/profile.php" class="flex items-center space-x-3">
+            <img class="w-8 h-8 rounded-full"
+              src="<?php echo (!empty($users['image_path'])
+                      ? $users['image_path']
+                      : 'https://ui-avatars.com/api/?name=' . urlencode($users['first_name'] ?? 'User')); ?>"
+              alt="Avatar">
+            <p class="text-base text-white"><?php echo $users["first_name"] ?? null ?></p>
+          </a>
         </div>
       </div>
     </div>

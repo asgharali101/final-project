@@ -18,20 +18,20 @@ if (! $id  || $users["role_id"] != 1) {
     exit;
 }
 
-$stmt = $conn->query("SELECT * from categories where id =$id");
-$categories = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmt = $conn->query("SELECT * from roles where id =$id");
+$roles = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
 
-if (isset($_POST['category'])) {
-    $category = $_POST['category'] ?? null;
-    if (empty($_POST['category']) || strlen($_POST['category']) > 30) {
-        $errors['category'] = 'category is required and must be less than 30 characters.';
+if (isset($_POST['role'])) {
+    $role = $_POST['role'] ?? null;
+    if (empty($_POST['role']) || strlen($_POST['role']) > 30) {
+        $errors['role'] = 'role is required and must be less than 30 characters.';
     }
     if (empty($errors)) {
 
-        $addData = $conn->exec("UPDATE categories SET name ='$category'  where id=$id");
-        header('location:../../../../user/category.php');
+        $addData = $conn->exec("UPDATE roles SET role ='$role'  where id=$id");
+        header('location:../../../../user/role.php');
     }
 }
 
@@ -113,28 +113,28 @@ if (isset($_POST['category'])) {
             <header class="card-header">
                 <p class="card-header-title">
                     <span class="icon"><i class="mdi mdi-tag"></i></span>
-                    Edit Category
+                    Edit role
                 </p>
             </header>
             <div class="card-content">
                 <form action="" method="POST" enctype="multipart/form-data">
 
                     <div class="field">
-                        <label class="label">Category</label>
+                        <label class="label">role</label>
                         <div class="field-body">
                             <div class="field">
                                 <div class="control">
                                     <input
                                         type="text"
                                         autocomplete="on"
-                                        name="category"
-                                        value="<?= $categories['name'] ?? null ?>"
+                                        name="role"
+                                        value="<?= $roles['role'] ?? null ?>"
                                         class="input"
                                         required />
-                                    <p class="text-red-500" id="message"><?php echo $errors["category"] ?? null ?></p>
+                                    <p class="text-red-500" id="message"><?php echo $errors["role"] ?? null ?></p>
 
                                 </div>
-                                <p class="help">Required. Your categories</p>
+                                <p class="help">Required. Your roles</p>
                             </div>
                         </div>
                     </div>
@@ -148,7 +148,7 @@ if (isset($_POST['category'])) {
                             <button type="submit" name="submit" class="button green">Submit</button>
                         </div>
                         <div class="control">
-                            <a href="../../user/category.php" class="button blue">Back</a>
+                            <a href="../../user/role.php" class="button blue">Back</a>
                         </div>
                     </div>
                 </form>

@@ -59,7 +59,12 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
         </a>
       </li>
 
-
+      <li class="--set-active-category-html">
+        <a href="../user/role.php">
+          <span class="icon"><i class="mdi mdi-account"></i></span>
+          <span class="menu-item-label">Roles</span>
+        </a>
+      </li>
 
 
       <li>

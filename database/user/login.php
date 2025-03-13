@@ -2,7 +2,7 @@
 
 require_once '../../connection.php';
 session_start();
-$error = [];
+$error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $login = $_POST['login'] ?? null;
@@ -22,6 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     header('location:../../index.html');
+  } else {
+    $error = "Invalid Email or Password";
   }
 }
 
@@ -95,7 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php require_once("./header.php"); ?>
     </div>
     <section class="section main-section">
+
       <div class="card">
+        <p class="text-center text-red-500" id="message"><?php echo $error ?></p>
 
         <header class="card-header">
           <p class="card-header-title">
@@ -164,7 +168,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </div>
   </div>
-
+  <script>
+    setTimeout(() => {
+      const messageDiv = document.getElementById('message');
+      if (messageDiv) {
+        messageDiv.style.display = 'none';
+      }
+    }, 10000);
+  </script>
   <!-- Scripts below are for demo only -->
   <script
     type="text/javascript"

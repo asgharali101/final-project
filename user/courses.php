@@ -4,7 +4,6 @@ session_start();
 require_once '../connection.php';
 require_once '../database/course/add.php';
 
-
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 
 if ($priviousEmail === null) {
@@ -18,37 +17,51 @@ JOIN roles ON users.role_id = roles.id
 WHERE email='$priviousEmail'");
 $users = $userStmt->fetch(PDO::FETCH_ASSOC);
 
-
 $role_id = $users['role_id'] ?? null;
 $user_id = $users['id'] ?? null;
 
+$status = $_GET['is_active'] ?? null;
 
-if ($role_id == 3) {
+if ($role_id == 3 || $role_id == 2) {
     $courseStmt = $conn->query(
         "SELECT courses.*, categories.name as category_name, COUNT(topics.id) as topic_count
         FROM courses
-        JOIN categories ON courses.category_id = categories.id
+        LEFT JOIN categories ON courses.category_id = categories.id
         JOIN enrollments ON courses.id = enrollments.course_id
         LEFT JOIN topics ON courses.id = topics.course_id
-        WHERE enrollments.user_id = $user_id
-        GROUP BY courses.id"
+        WHERE enrollments.user_id = $user_id 
+        GROUP BY courses.id 
+"
     );
 } else {
-    $courseStmt = $conn->query(
-        "SELECT courses.*, categories.name as category_name, COUNT(topics.id) as topic_count
+    if (isset($status)) {
+        $courseStmt = $conn->query(
+            "SELECT courses.*, categories.name as category_name, COUNT(topics.id) as topic_count
+        FROM courses
+        JOIN categories ON courses.category_id = categories.id
+        LEFT JOIN topics ON courses.id = topics.course_id where courses.is_active=$status
+        GROUP BY courses.id "
+        );
+    } else {
+        $courseStmt = $conn->query(
+            'SELECT courses.*, categories.name as category_name, COUNT(topics.id) as topic_count
         FROM courses
         JOIN categories ON courses.category_id = categories.id
         LEFT JOIN topics ON courses.id = topics.course_id
-        GROUP BY courses.id"
-    );
+        GROUP BY courses.id '
+        );
+    }
 }
 
 $courses = $courseStmt->fetchAll(PDO::FETCH_ASSOC);
 
-
 $categoriesStmt = $conn->query('SELECT * from categories');
 $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 
+$Stmt = $conn->query("SELECT * from enrollments WHERE user_id=$user_id");
+$currentStatus = $Stmt->fetch(PDO::FETCH_ASSOC);
+
+$isActive = $currentStatus["is_active"] ?? null;
 
 ?>
 
@@ -132,12 +145,84 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
     <?php require_once '../particions/nav.php' ?>
     <?php require_once '../particions/sidebar.php' ?>
     <div id="app" class="" x-data="{ showAddCourse: false }">
+
+        <?php if ($role_id != 1) { ?>
+            <div class="text-center">
+                <?php if ($isActive == 1) { ?>
+                    <div id="activeMessage" class="relative inline-block px-5 py-3 mt-5 text-white rounded-lg shadow-lg bg-gradient-to-r from-green-500 to-green-600">
+                        <span class="text-base font-medium tracking-wide">
+                            ✅ Your course is active — you can watch this!
+                        </span>
+                        <button onclick="closeMessage('activeMessage')" class="absolute text-2xl text-red-600 left-[26.6rem] bottom-6 hover:text-red-700">
+                            ✖
+                        </button>
+                    </div>
+                <?php } else { ?>
+                    <div id="inactiveMessage" class="relative inline-block px-5 py-3 mt-5 text-white rounded-lg shadow-lg bg-gradient-to-r from-red-500 to-red-600">
+                        <span class="text-base font-medium tracking-wide">
+                            ❌ Your course is inactive — you cannot watch this.
+                        </span>
+                        <button onclick="closeMessage('inactiveMessage')" class="absolute text-2xl text-white left-[26.6rem] bottom-6 hover:text-gray-200">
+                            ✖
+                        </button>
+                    </div>
+                <?php } ?>
+            </div>
+            <script>
+                function closeMessage(id) {
+                    const message = document.getElementById(id);
+                    if (message) {
+                        message.style.display = 'none';
+                    }
+                }
+            </script>
+        <?php } ?>
+
         <?php
         if ($role_id == 1) { ?>
 
             <button @click="showAddCourse = !showAddCourse" class="mt-6 mb-4 ml-10 button green">
                 Add Course
             </button>
+            <div class="flex items-center ml-10 space-x-3">
+                <a href="http://final-project.test/user/courses.php">
+                    <button class="px-4 py-2 font-bold text-white transition bg-blue-500 rounded-full shadow-lg hover:bg-blue-600">All</button>
+                </a>
+                <div class="p-4 space-y-4 rounded-lg">
+                    <form method="GET">
+                        <label for="toggle" class="flex items-center cursor-pointer">
+                            <div class="mr-3 font-bold text-gray-700">Inactive</div>
+
+                            <!-- Toggle Switch -->
+                            <div class="relative">
+                                <!-- Hidden input for default inactive state -->
+                                <input type="hidden" name="is_active" value="0">
+
+                                <input
+                                    type="checkbox"
+                                    id="toggle"
+                                    name="is_active"
+                                    value="1"
+                                    class="sr-only"
+                                    onchange="this.form.submit()"
+                                    <?php echo (isset($_GET['is_active']) && $_GET['is_active'] == 1) ? 'checked' : ''; ?>>
+
+                                <div class="block w-14 h-8 rounded-full 
+                                           <?php echo (isset($_GET['is_active']) && $_GET['is_active'] == 1) ? 'bg-green-500' : 'bg-red-500'; ?>">
+                                </div>
+                                <div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 transform 
+                                         <?php echo (isset($_GET['is_active']) && $_GET['is_active'] == 1) ? 'translate-x-6' : ''; ?>">
+                                </div>
+                            </div>
+
+                            <div class="ml-3 font-bold text-gray-700">Active</div>
+                        </label>
+                    </form>
+                </div>
+
+            </div>
+
+
 
             <div x-show="showAddCourse" x-transition x-cloak @click.outside="showAddCourse = false" class="card">
                 <header class="card-header">
@@ -150,33 +235,48 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                     <form method="POST" class="flex flex-col space-y-4" action="" enctype="multipart/form-data">
                         <div class="control">
                             <label class="label">Course Name</label>
-                            <input required type="text" name="title" value="<?php echo $_POST["title"] ?? null ?>" placeholder="Enter course name" class="input" />
-                            <p class="text-red-500" id="message"><?php echo $errors["title"] ?? null ?></p>
+                            <input required type="text" name="title" value="<?php echo $_POST['title'] ?? null ?>" placeholder="Enter course name" class="input" />
+                            <p class="text-red-500" id="message"><?php echo $errors['title'] ?? null ?></p>
 
                         </div>
 
                         <div class="control">
                             <label class="label">feature_image</label>
-                            <input type="file" name="feature_image" class="input" />
-                            <p class="text-red-500" id="message"><?php echo $errors["feature_image"] ?? null ?></p>
+                            <input required type="file" name="feature_image" class="input" />
+                            <p class="text-red-500" id="message"><?php echo $errors['feature_image'] ?? null ?></p>
 
                         </div>
 
                         <div class="control">
                             <label class="label">Course Description</label>
-                            <textarea name="description" placeholder="Enter course description" class="textarea"><?php echo $_POST["description"] ?? null ?></textarea>
-                            <p class="text-red-500" id="message"><?php echo $errors["description"] ?? null ?></p>
+                            <textarea name="description" placeholder="Enter course description" class="textarea"><?php echo $_POST['description'] ?? null ?></textarea>
+                            <p class="text-red-500" id="message"><?php echo $errors['description'] ?? null ?></p>
 
                         </div>
 
-                        <div class="">
-                            <label class="label">Category</label>
-                            <div class="select">
-                                <select name="category_id">
-                                    <?php foreach ($categories as $category) { ?>
-                                        <option value="<?= $category['id'] ?>"><?= $category['name'] ?></option>
-                                    <?php } ?>
+                        <div class="flex items-center justify-between">
+                            <div class="">
+                                <label class="label">Category</label>
+                                <div class="select">
+                                    <select name="category_id">
+                                        <?php foreach ($categories as $category) { ?>
+                                            <option value="<?= $category['id'] ?>"><?= $category['name'] ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="control">
+                                <label class="label">Status</label>
+                                <select
+                                    class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md"
+                                    name="is_active"
+                                    id="is_active">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
                                 </select>
+
+
                             </div>
                         </div>
 
@@ -190,7 +290,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php } ?>
 
-        <?php if (isset($courses) && $role_id == 1 || $role_id == 2) { ?>
+        <?php if (isset($courses)) { ?>
             <section class="pt-6 section main-section bg-gray-50">
                 <div class="container px-4 mx-auto">
                     <!-- Grid Layout -->
@@ -204,7 +304,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="p-4 transition-all bg-white border border-gray-200 rounded-lg shadow-lg hover:scale-100 hover:shadow-xl">
                                 <!-- Course Image -->
                                 <div class="relative overflow-hidden rounded-lg aspect-w-16 aspect-h-9">
-                                    <a href="./topics.php?id=<?php echo $course["id"] ?? null ?>">
+                                    <a href="./topics.php?id=<?php echo $course['id'] ?? null ?>">
                                         <img src="<?= $course['feature_image'] ?? 'https://via.placeholder.com/300x200' ?>"
                                             class="object-cover w-full h-64 rounded-lg"
                                             alt="Course thumbnail">
@@ -222,8 +322,8 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                                     <div class="flex items-center justify-between mt-4 text-sm text-gray-600">
                                         <!-- cate -->
                                         <span class="px-5 py-1 font-medium border border-gray-300 rounded-full ">
-                                            <?= $course["category_name"] ?? null ?>
-                                            <?php $course_id = $course["id"]; ?>
+                                            <?= $course['category_name'] ?? null ?>
+                                            <?php $course_id = $course['id']; ?>
                                         </span>
                                         <!-- Price -->
                                         <span class="text-lg font-bold text-blue-700">
@@ -234,7 +334,7 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 
                                     <!-- Title -->
                                     <h6 class="py-2 text-lg font-bold text-gray-900 transition hover:text-blue-600 hover:text-primary">
-                                        <a href="./topics.php?id=<?php echo $course["id"] ?? null ?>"
+                                        <a href="./topics.php?id=<?php echo $course['id'] ?? null ?>"
                                             class="line-clamp-2" aria-label="Course title">
                                             <?= $course['title'] ?? 'Untitled Course' ?>
                                         </a>
@@ -264,11 +364,11 @@ $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
                                         <div class="flex items-center gap-x-3">
                                             <div class="flex items-center">
                                                 <i class="mr-1 text-base ri-book-line"></i>
-                                                <span><?= $course['topic_count'] . " Episodes" ?? '0 Lessons' ?></span>
+                                                <span><?= $course['topic_count'] . ' Episodes' ?? '0 Lessons' ?></span>
                                             </div>
                                             <div class="flex items-center">
                                                 <i class="mr-1 text-base ri-book-line"></i>
-                                                <span><?= $enrollments["student_count"] . " Students" ?? '0 Lessons' ?></span>
+                                                <span><?= $enrollments['student_count'] . ' Students' ?? '0 Lessons' ?></span>
                                             </div>
                                         </div>
                                     </div>

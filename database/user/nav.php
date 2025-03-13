@@ -4,6 +4,7 @@ $email = $_SESSION['user']['email'] ?? null;
 $stmt = $conn->query("SELECT * FROM users WHERE email='$email'");
 $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$image = "../" . $currentUser["image_path"];
 ?>
 
 
@@ -74,8 +75,8 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
         <a class="navbar-link">
           <div class="user-avatar">
             <img class="rounded-full"
-              src="<?php echo (!empty($currentUser['image_path'])
-                      ? $currentUser['image_path']
+              src="<?php echo (!empty($image)
+                      ? "../" . $image
                       : 'https://ui-avatars.com/api/?name=' . urlencode($currentUser['first_name'] ?? 'User')); ?>"
               alt="Avatar">
           </div>
@@ -83,7 +84,7 @@ $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
           <span class="icon"><i class="mdi mdi-chevron-down"></i></span>
         </a>
         <div class="navbar-dropdown">
-          <a href="../user/profile.php?id=<?php echo $currentUser['id'] ?? null ?> " class="navbar-item">
+          <a href="../../user/profile.php?id=<?php echo $currentUser['id'] ?? null ?> " class="navbar-item">
             <span class="icon"><i class="mdi mdi-account"></i></span>
             <span>My Profile</span>
           </a>

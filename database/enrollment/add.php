@@ -1,28 +1,31 @@
 <?php
 
-require_once '../../connection.php';
-$error = '';
-session_start();
-$currentEmail = $_SESSION["user"]["email"] ?? null;
-if ($currentEmail == null) {
-    header('location:../../index.html');
-    exit;
-}
+$errors = [];
 
-$stmt = $conn->query("SELECT * FROM users where email='$currentEmail'");
-$currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if ($currentUser["role_id"] !== 1) {
-    header("location:../../error.php");
-}
-
+// require_once '../connection.php';
 
 if (isset($_POST['course_id'])) {
     $course_id = $_POST['course_id'] ?? null;
     $user_id = $_POST['user_id'] ?? null;
+    $is_active = $_POST["is_active"] ?? null;
 
-    $addData = $conn->exec("INSERT INTO enrollments(user_id,course_id,enrolled_at) value($user_id,$course_id,now())");
-    if ($addData) {
-        header('location:../../../../user/enrollment.php');
+    $stmt = $conn->query("SELECT count(*) as count from enrollments where user_id=$user_id");
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result["count"] > 0) {
+        $errors["user_id"] = 'This user is already enrolled.';
+    }
+
+    if (empty($errors)) {
+        $addData = $conn->exec("INSERT INTO enrollments(user_id, course_id, is_active, enrolled_at) value($user_id, $course_id, $is_active, now())");
+        if ($addData) {
+            header('location:../../../../user/enrollment.php');
+            exit;
+        }
+    }
+}
+if (!empty($errors)) {
+    foreach ($errors as $error) {
+        echo "<p id='message' style='color: red;'>$error</p>";
     }
 }

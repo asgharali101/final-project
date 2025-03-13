@@ -40,8 +40,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors['address'] = 'address is required and must be less than 500 characters.';
   }
 
-  if (!DateTime::createFromFormat('Y-m-d', $date_of_birth)) {
-    $errors['date_of_birth'] = ' invalid date_of_birth';
+  $date_of_birth_obj = DateTime::createFromFormat('Y-m-d', $date_of_birth);
+  $today = new DateTime();
+  $min_age_date = (new DateTime())->modify('-10 years');
+
+  if (!$date_of_birth_obj || $date_of_birth_obj->format('Y-m-d') !== $date_of_birth) {
+    $errors['date_of_birth'] = 'Invalid date format (use YYYY-MM-DD).';
+  } elseif ($date_of_birth_obj > $today) {
+    $errors['date_of_birth'] = 'Date of birth cannot be in the future.';
+  } elseif ($date_of_birth_obj > $min_age_date) {
+    $errors['date_of_birth'] = 'You must be at least 10 years old.';
   }
 
 
@@ -53,27 +61,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $fileType = pathinfo($filename, PATHINFO_EXTENSION);
   $allowedTypes = ['png', 'jpeg', 'jpg'];
   $filePath = null;
-  $stmt = $conn->query("SELECT * from users where email='$email'");
-  $result = $stmt->fetch(PDO::FETCH_OBJ);
-  if ($result) {
-    $errors["email"] = 'Email already be use';
-  } else {
-    if (! in_array(strtolower($fileType), $allowedTypes)) {
-      $errors["image"] = "Only images are allowed MP4 or other files are not allowed.";
-    } else {
-      $filePath = '../../uploads/' . $filename;
-      move_uploaded_file($_FILES['image']['tmp_name'], $filePath);
-    }
 
+  if (! empty($filename)) {
+    if (! in_array($fileType, $allowedTypes)) {
+      $errors['image'] = 'Image extension type must be png, jpeg, jpg.';
+    }
+  }
+
+
+
+  $stmt = $conn->query("SELECT count(*) as count from users where email='$email'");
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($result["count"] > 0) {
+    $errors["email"] = 'Email already in use. Please choose another email.';
+  } else {
     if (empty($errors)) {
+
+      if (! empty($filename)) {
+        $filePath = '../../uploads/' . $filename;
+        move_uploaded_file($_FILES['image']['tmp_name'], $filePath);
+      }
+
+      $addData = $conn->exec("INSERT INTO users(role_id,first_name,last_name,email,password,date_of_birth,image_path,address,is_active) value($role_id,'$firstName','$lastName','$email','$password','$date_of_birth','$filePath','$address',0)");
+      header('location:../../index.html');
       $_SESSION['user'] = [
         'first_name' => $firstName,
         'last_name' => $lastName,
         'email' => $email,
         'role_id' => $role_id,
       ];
-      $addData = $conn->exec("INSERT INTO users(role_id,first_name,last_name,email,password,date_of_birth,image_path,address) value($role_id,'$firstName','$lastName','$email','$password','$date_of_birth','$filePath','$address')");
-      header('location:../../index.html');
+      exit();
     }
   }
 }
@@ -297,7 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="field spaced">
               <label class="label">Upload File</label>
               <div class="control">
-                <input required
+                <input
                   class="w-full border border-gray-400 rounded-md file:border-0 file:rounded-lg file:px-4 file:py-2"
                   type="file"
                   name="image"
@@ -337,7 +355,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </div>
   </div>
-
+  <script>
+    setTimeout(() => {
+      const messageDiv = document.getElementById('message');
+      if (messageDiv) {
+        messageDiv.style.display = 'none';
+      }
+    }, 10000);
+  </script>
   <!-- Scripts below are for demo only -->
   <script
     type="text/javascript"

@@ -1,6 +1,8 @@
 <?php
-require_once '../connection.php';
 session_start();
+
+require_once '../connection.php';
+require_once '../database/enrollment/add.php';
 
 $priviousEmail = $_SESSION['user']['email'] ?? null;
 if ($priviousEmail == null) {
@@ -12,7 +14,9 @@ $userStmt = $conn->query("SELECT * from users WHERE email='$priviousEmail'");
 $CurrentUsers = $userStmt->fetch(PDO::FETCH_ASSOC);
 
 $role_id = $CurrentUsers['role_id'] ?? null;
-
+if ($role_id != 1) {
+    header('location:../../error.php');
+}
 
 $stmt = $conn->query('SELECT * FROM users');
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -20,17 +24,28 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt = $conn->query('SELECT * FROM courses');
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-$stmt = $conn->query('SELECT
-    enrollments.id, enrollments.enrolled_at,
+$status = $_GET['is_active'] ?? null;
+if (isset($status)) {
+    $stmt = $conn->query("SELECT
+    enrollments.id, enrollments.is_active, enrollments.enrolled_at,
+    users.first_name as first_name,
+    users.role_id as role_id,  
+    courses.title as course_title
+FROM enrollments
+LEFT JOIN users ON users.id = enrollments.user_id
+LEFT JOIN courses ON courses.id = enrollments.course_id WHERE enrollments.is_active=$status");
+    $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $stmt = $conn->query('SELECT
+    enrollments.id, enrollments.is_active, enrollments.enrolled_at,
     users.first_name as first_name,
     users.role_id as role_id,  
     courses.title as course_title
 FROM enrollments
 LEFT JOIN users ON users.id = enrollments.user_id
 LEFT JOIN courses ON courses.id = enrollments.course_id');
-$enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 ?>
 
@@ -41,7 +56,7 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Users - Admin One Tailwind CSS Admin Dashboard</title>
+    <title>Dashboard - Admin One Tailwind CSS Admin Dashboard</title>
 
     <!-- Tailwind is included -->
     <link rel="stylesheet" href="css/main.css?v=1628755089081" />
@@ -71,9 +86,13 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta
         property="twitter:description"
         content="Admin One - free Tailwind dashboard" />
-
+    <meta
+        property="twitter:image:src"
+        content="https://justboil.me/images/one-tailwind/repository-preview-hi-res.png" />
     <meta property="twitter:image:width" content="1920" />
     <meta property="twitter:image:height" content="960" />
+    <link href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script
@@ -90,6 +109,8 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
     <style>
         [x-cloak] {
             display: none !important;
@@ -105,14 +126,63 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div id="app" x-data="{showAddEnrollment:false}">
         <?php
         require_once '../particions/nav.php';
-        require_once '../particions/sidebar.php';
-        ?>
+require_once '../particions/sidebar.php';
+?>
         <?php
-        if ($role_id == 1) { ?>
+if ($role_id == 1) { ?>
 
-            <button @click="showAddEnrollment = !showAddEnrollment" class="mt-6 mb-4 ml-10 button green">
-                Add Enrollment
-            </button>
+            <div class="flex items-center justify-between">
+                <div>
+                    <button @click="showAddEnrollment = !showAddEnrollment" class="mt-6 mb-4 ml-10 button green">
+                        Add Enrollment
+                    </button>
+                    <a href="./download-enroll.php" class="mt-6 mb-4 ml-10 button green">
+                        Download enroll
+                    </a>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <a href="http://final-project.test/user/enrollment.php">
+                        <button class="px-4 py-2 font-bold text-white transition bg-blue-500 rounded-full shadow-lg hover:bg-blue-600">All</button>
+                    </a>
+                    <div class="p-4 space-y-4 rounded-lg">
+                        <form method="GET">
+                            <label for="toggle" class="flex items-center cursor-pointer">
+                                <div class="mr-3 font-bold text-gray-700">Inactive</div>
+
+                                <!-- Toggle Switch -->
+                                <div class="relative">
+                                    <!-- Hidden input for default inactive state -->
+                                    <input type="hidden" name="is_active" value="0">
+
+                                    <input
+                                        type="checkbox"
+                                        id="toggle"
+                                        name="is_active"
+                                        value="1"
+                                        class="sr-only"
+                                        onchange="this.form.submit()"
+                                        <?php echo (isset($_GET['is_active']) && $_GET['is_active'] == 1) ? 'checked' : ''; ?>>
+
+                                    <div class="block w-14 h-8 rounded-full 
+                     <?php echo (isset($_GET['is_active']) && $_GET['is_active'] == 1) ? 'bg-green-500' : 'bg-red-500'; ?>">
+                                    </div>
+                                    <div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 transform 
+                      <?php echo (isset($_GET['is_active']) && $_GET['is_active'] == 1) ? 'translate-x-6' : ''; ?>">
+                                    </div>
+                                </div>
+
+                                <div class="ml-3 font-bold text-gray-700">Active</div>
+                            </label>
+                        </form>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
 
             <div x-show="showAddEnrollment" x-transition x-cloak @click.outside="showAddEnrollment = false" class="mb-10 card">
                 <header class="card-header">
@@ -122,7 +192,7 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </p>
                 </header>
                 <div class=" card-content">
-                    <form method="POST" class="flex flex-col space-y-4" action="../database/enrollment/add.php" enctype="multipart/form-data">
+                    <form method="POST" class="flex flex-col space-y-4" action="" enctype="multipart/form-data">
                         <div class="">
                             <div class="select">
                                 <div class="control">
@@ -132,6 +202,7 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <option value="<?= $user['id'] ?>"><?= $user['first_name'] ?></option>
                                         <?php } ?>
                                     </select>
+                                    <p class="text-red-500" id="message"><?php echo $errors['user_id'] ?? null ?></p>
                                 </div>
                             </div>
 
@@ -148,6 +219,22 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                        <!-- <div class="control">
+                            <label class="label">Role</label>
+                            <input readonly type="text" name="role_id" value="<?php echo $current_role['role'];
+    ?>" id="">
+                        </div> -->
+
+                        <div class="control">
+                            <label class="label">Status</label>
+                            <select
+                                class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md"
+                                name="is_active"
+                                id="is_active">
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
 
                         </div>
 
@@ -171,20 +258,39 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr>
                     <th>id</th>
                     <th>Users</th>
+                    <th>Role</th>
                     <th>Courses</th>
-                    <th>Enrolled_at</th>
+                    <th>Is_active</th>
                     <?php if ($role_id == 1) { ?>
                         <th class="text-right ">Actions</th>
                     <?php } ?>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($enrollments as $enrollment) { ?>
+                <?php foreach ($enrollments as $enrollment) {
+                    $user_role = $enrollment['role_id'] ?? null;
+                    $stmt = $conn->query("SELECT * from roles WHERE id=$user_role");
+                    $current_role = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    ?>
                     <tr class="text-left sm:w-full">
                         <td><?= $enrollment['id'] ?? null ?></td>
                         <td><?= $enrollment['first_name'] ?? null ?></td>
+                        <td><?= $current_role['role'];
+                    ?></td>
                         <td><?= $enrollment['course_title'] ?? null ?></td>
-                        <td><?= $enrollment['enrolled_at'] ?? null ?></td>
+                        <td>
+                            <?php if ($enrollment['is_active'] == 1) { ?>
+                                <span style="color: green; font-weight: bold;">
+                                    ● Active
+                                </span>
+                            <?php } else { ?>
+                                <span style="color: red; font-weight: bold;">
+                                    ● Inactive
+                                </span>
+                            <?php } ?>
+                        </td>
+
 
                         <?php if ($role_id == 1) { ?>
                             <td class="actions-cell">
@@ -243,7 +349,14 @@ $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
 <script type="text/javascript" src="js/chart.sample.min.js"></script>
-
+<script>
+    setTimeout(() => {
+        const messageDiv = document.getElementById('message');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+        }
+    }, 10000);
+</script>
 <script>
     !(function(f, b, e, v, n, t, s) {
         if (f.fbq) return;

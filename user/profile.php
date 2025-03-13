@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en" class="">
 
@@ -52,23 +51,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profile </title>
+  <title>Dashboard - Admin One Tailwind CSS Admin Dashboard</title>
 
   <!-- Tailwind is included -->
   <link rel="stylesheet" href="css/main.css?v=1628755089081" />
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <link rel="icon" type="" sizes="32x32" href="favicon-32x32.png" />
-  <link rel="icon" type="" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
   <link rel="mask-icon" href="safari-pinned-tab.svg" color="#00b4b6" />
 
   <meta name="description" content="Admin One - free Tailwind dashboard" />
 
   <meta
     property="og:url"
-    content="https://github.com/asgharali101/" />
-  <meta property="og:site_name" content="JustBoil.me" />
+    content="https://github.com/asgharali101" />
+  <meta property="og:site_name" content="asghar.me" />
   <meta property="og:title" content="Admin One HTML" />
   <meta
     property="og:description"
@@ -83,9 +81,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta
     property="twitter:description"
     content="Admin One - free Tailwind dashboard" />
-
+  <meta
+    property="twitter:image:src"
+    content="https://justboil.me/images/one-tailwind/repository-preview-hi-res.png" />
   <meta property="twitter:image:width" content="1920" />
   <meta property="twitter:image:height" content="960" />
+  <link href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script
@@ -100,6 +102,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     gtag("js", new Date());
     gtag("config", "UA-130795909-1");
   </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
 </head>
 
 <body>
@@ -112,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         class="flex flex-col items-center justify-between space-y-6 md:flex-row md:space-y-0">
         <ul>
           <li><?php
-              echo $currentPassword['role_name'] ?? '';
+              echo $currentUser['role_name'] ?? '';
               ?></li>
           <li>Profile</li>
         </ul>

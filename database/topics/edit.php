@@ -54,8 +54,8 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
             $errors['attachment_path'] = 'attachment size must be 2MB or less.';
         }
 
-        if ($_FILES['video_path']['size'] > 10 * 1024 * 1024) {
-            $errors['video_path'] = 'video size must be 10MB or less.';
+        if ($_FILES['video_path']['size'] > 5 * 1024 * 1024) {
+            $errors['video_path'] = 'video size must be 5MB or less.';
         }
 
         $videoName = $_FILES["video_path"]["name"] ?? null;
@@ -70,38 +70,41 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
 
         $videoPath = $currentTopic["video_path"];
         $videoAllowedTypes = ["mp4", "webm",];
+
+        $attachmentPath = $currentTopic["attachment_path"];
+        $attachmentAllowedTypes = ["pdf", "csv", "xls", "xlsx", "jpeg", "jpg", "png", "gif", "svg", "webp"];
+
+
+        if (! in_array($videoExtension, $videoAllowedTypes)) {
+            $errors['video_path'] = 'video extension type must be mp4/webm .';
+        }
+
+        if (! in_array($attachmentExtension, $attachmentAllowedTypes)) {
+            $errors['attachment_path'] = 'attachment extension type must be pdf, csv, xls, xlsx, jpeg, jpg, png, gif, svg,webp';
+        }
+
+
         if (empty($errors)) {
-
-            if (in_array($videoExtension, $videoAllowedTypes)) {
-                if (isset($_FILES['video_path']) && $_FILES['video_path']['error'] == 0) {
-                    $videoPath = '../../uploads/' . $fileName . "." . $videoExtension;
-                    if (move_uploaded_file($_FILES['video_path']['tmp_name'], $videoPath)) {
-                        unlink($currentTopic["video_path"]);
-                    }
+            if (isset($_FILES['video_path']) && $_FILES['video_path']['error'] == 0) {
+                $videoPath = '../../uploads/' . $fileName . "." . $videoExtension;
+                if (move_uploaded_file($_FILES['video_path']['tmp_name'], $videoPath)) {
+                    unlink($currentTopic["video_path"]);
                 }
             }
 
-            $attachmentPath = $currentTopic["attachment_path"];
-            $attachmentAllowedTypes = ["pdf", "csv", "xls", "xlsx", "jpeg", "jpg", "png", "gif", "svg", "webp"];
 
-            if (! in_array($attachmentExtension, $attachmentAllowedTypes)) {
-                if (isset($_FILES['attachment_path']) && $_FILES['attachment_path']['error'] == 0) {
-                    $attachmentPath = '../../uploads/' . $fileName . "." . $attachmentExtension;
-                    if (move_uploaded_file($_FILES['attachment_path']['tmp_name'], $attachmentPath)) {
-                        unlink($currentTopic["attachment_path"]);
-                    }
+            if (isset($_FILES['attachment_path']) && $_FILES['attachment_path']['error'] == 0) {
+                $attachmentPath = '../../uploads/' . $fileName . "." . $attachmentExtension;
+                if (move_uploaded_file($_FILES['attachment_path']['tmp_name'], $attachmentPath)) {
+                    unlink($currentTopic["attachment_path"]);
                 }
-            } else {
-                $errors['attachment_path'] = 'attachment extension type must be pdf, csv, xls, xlsx, jpeg, jpg, png, gif, svg,webp';
             }
 
-            // if (empty($errors)) {
 
             $query = $conn->exec("UPDATE topics SET title = '$title', description = '$description', content = '$content', video_path = '$videoPath', attachment_path = '$attachmentPath', created_at = NOW(), course_id = $course_id WHERE id = $id");
             if ($query) {
                 header("location:../../../../user/topics.php");
             }
-            // }
         }
     }
 
@@ -113,7 +116,7 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="" sizes="16x16" href="../../uploads/A.png" />
+        <link rel="icon" type="" sizes="16x16" href="../../user/1.png" />
 
         <title>Topics of course</title>
 
@@ -136,7 +139,7 @@ if ($currentUser["role_id"] == 1 || $currentUser["role_id"] == 2) {
     </head>
 
     <body>
-        <?php require_once("../../particions/nav.php") ?>
+        <?php require_once("nav.php") ?>
         <?php require_once("./sidebar.php") ?>
         <div id="app">
             <div class="card ">

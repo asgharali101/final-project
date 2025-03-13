@@ -14,22 +14,22 @@ $users = $userStmt->fetch(PDO::FETCH_ASSOC);
 
 $role_id = $users['role_id'] ?? null;
 
-$categoryStmt = $conn->query('SELECT * FROM categories');
-$categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
+$roleStmt = $conn->query('SELECT * FROM roles');
+$roles = $roleStmt->fetchAll(PDO::FETCH_ASSOC);
 
 if ($role_id != 1) {
     header("location:../../error.php");
 }
 
-if (isset($_POST['category'])) {
+if (isset($_POST['role'])) {
     $errors = [];
-    $category = $_POST['category'] ?? null;
-    if (empty($_POST['category']) || strlen($_POST['category']) > 30) {
-        $errors['category'] = 'category is required and must be less than 30 characters.';
+    $role = $_POST['role'] ?? null;
+    if (empty($_POST['role']) || strlen($_POST['role']) > 30) {
+        $errors['role'] = 'role is required and must be less than 30 characters.';
     }
     if (empty($errors)) {
-        $addData = $conn->exec("INSERT INTO categories(name) value('$category')");
-        header('location:../../../../user/category.php');
+        $addData = $conn->exec("INSERT INTO roles(role) value('$role')");
+        header('location:../../../../user/role.php');
     }
 }
 
@@ -115,26 +115,26 @@ if (isset($_POST['category'])) {
     <?php require_once '../particions/nav.php' ?>
     <?php require_once '../particions/sidebar.php' ?>
     <!-- profile -->
-    <div id="app" class="py-4" x-data="{showCategory:false}">
+    <div id="app" class="py-4" x-data="{showrole:false}">
 
         <?php if ($role_id == 1) { ?>
 
-            <button @click="showCategory = !showCategory" class="mt-6 mb-4 ml-10 button green">
-                Add Category
+            <button @click="showrole = !showrole" class="mt-6 mb-4 ml-10 button green">
+                Add role
             </button>
 
-            <div class="mb-4 card" x-show="showCategory" x-transition x-cloak @click.outside="showCategory = false">
+            <div class="mb-4 card" x-show="showrole" x-transition x-cloak @click.outside="showrole = false">
                 <header class="card-header">
                     <p class="card-header-title">
                         <span class="icon"><i class="mdi mdi-account-circle"></i></span>
-                        Add Category
+                        Add role
                     </p>
                 </header>
                 <div class="card-content">
                     <form method="POST" action="">
 
                         <div class="control">
-                            <label class="label">New Category</label>
+                            <label class="label">New role</label>
                             <div class="relative">
                                 <!-- Icon -->
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -145,11 +145,11 @@ if (isset($_POST['category'])) {
                                 <!-- Input Field -->
                                 <input
                                     type="text"
-                                    name="category"
-                                    value="<?php echo $_POST["category"] ?? null ?>"
-                                    placeholder="Enter category name"
+                                    name="role"
+                                    value="<?php echo $_POST["role"] ?? null ?>"
+                                    placeholder="Enter role name"
                                     class="pl-10 input" />
-                                <p class="text-red-500"><?php echo $errors["category"] ?? null ?></p>
+                                <p class="text-red-500"><?php echo $errors["role"] ?? null ?></p>
                             </div>
                         </div>
 
@@ -171,10 +171,10 @@ if (isset($_POST['category'])) {
                     <header class="card-header">
                         <p class="card-header-title">
                             <span class="icon"><i class="mdi mdi-buffer"></i></span>
-                            Categories
+                            roles
                         </p>
                     </header>
-                    <?php if (count($categories) != 0) { ?>
+                    <?php if (count($roles) != 0) { ?>
                         <div class="overflow-x-auto ">
                             <table class="w-full table-auto">
                                 <thead>
@@ -187,18 +187,18 @@ if (isset($_POST['category'])) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($categories as $category) { ?>
+                                    <?php foreach ($roles as $role) { ?>
                                         <tr class="">
-                                            <td class="px-4 py-2 border"><?= $category['id'] ?? '' ?></td>
-                                            <td class="px-4 py-2 border"><?= $category['name'] ?? '' ?></td>
+                                            <td class="px-4 py-2 border"><?= $role['id'] ?? '' ?></td>
+                                            <td class="px-4 py-2 border"><?= $role['role'] ?? '' ?></td>
                                             <?php if ($role_id == 1) { ?>
                                                 <td class="px-4 py-2 border actions-cell">
                                                     <div class="buttons">
-                                                        <a href="../database/category/edit.php?id=<?= $category['id'] ?>"
+                                                        <a href="../database/role/edit.php?id=<?= $role['id'] ?>"
                                                             class="button small green">
                                                             <span class="icon"><i class="mdi mdi-pencil"></i></span>
                                                         </a>
-                                                        <a href="../database/category/delete.php?id=<?= $category['id'] ?>"
+                                                        <a href="../database/role/delete.php?id=<?= $role['id'] ?>"
                                                             class="button small red">
                                                             <span class="icon"><i class="mdi mdi-trash-can"></i></span>
                                                         </a>
@@ -216,7 +216,7 @@ if (isset($_POST['category'])) {
                                 <div>
                                     <span class="icon large"><i class="mdi mdi-emoticon-sad mdi-48px"></i></span>
                                 </div>
-                                <p>No category found here…</p>
+                                <p>No role found here…</p>
                             </div>
                         </div>
                     <?php } ?>

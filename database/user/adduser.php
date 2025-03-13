@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $date_of_birth = $_POST['date_of_birth'] ?? null;
   $address = $_POST['address'] ?? null;
   $role_id = $_POST["role_id"];
+  $is_active = $_POST["is_active"];
 
   if (empty($_POST['first_name']) || strlen($_POST['first_name']) > 20) {
     $errors['first_name'] = 'First name is required and must be less than 20 characters.';
@@ -60,30 +61,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $fileType = pathinfo($filename, PATHINFO_EXTENSION);
   $allowedTypes = ['png', 'jpeg', 'jpg'];
   $filePath = null;
-  $stmt = $conn->query("SELECT * from users where email='$email'");
-  $result = $stmt->fetch(PDO::FETCH_OBJ);
-  if ($result) {
-    $errors["email"] = 'Email already be use';
-  } else {
-    if (! in_array(strtolower($fileType), $allowedTypes)) {
-      $errors["image"] = "Only images are allowed MP4 or other files are not allowed.";
-    } else {
-      $filePath = '../../uploads/' . $filename;
-      move_uploaded_file($_FILES['image']['tmp_name'], $filePath);
-    }
 
+
+  if (! empty($filename)) {
+    if (! in_array($fileType, $allowedTypes)) {
+      $errors['image'] = 'Image extension type must be png, jpeg, jpg.';
+    }
+  }
+
+
+
+  $stmt = $conn->query("SELECT count(*) as count from users where email='$email'");
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($result["count"] > 0) {
+    $errors["email"] = 'Email already in use. Please choose another email.';
+  } else {
     if (empty($errors)) {
-      // $_SESSION['user'] = [
-      //   'first_name' => $firstName,
-      //   'last_name' => $lastName,
-      //   'email' => $email,
-      //   'role_id' => $role_id,
-      // ];
-      $addData = $conn->exec("INSERT INTO users(role_id,first_name,last_name,email,password,date_of_birth,image_path,address) value($role_id,'$firstName','$lastName','$email','$password','$date_of_birth','$filePath','$address')");
-      header('location:../user/users.php');
+
+      if (! empty($filename)) {
+        $filePath = '../../uploads/' . $filename;
+        move_uploaded_file($_FILES['image']['tmp_name'], $filePath);
+      }
+
+      $addData = $conn->exec("INSERT INTO users(role_id,first_name,last_name,email,password,date_of_birth,image_path,address,is_active) value($role_id,'$firstName','$lastName','$email','$password','$date_of_birth','$filePath','$address',0)");
+      header('location:../../index.html');
+      exit();
     }
   }
 }
+
+
+
 
 ?>
 
@@ -153,7 +162,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div id="app">
 
     <div>
-      <?php require_once("./header.php"); ?>
+      <?php require_once("nav.php"); ?>
+      <?php require_once("./sidebar.php"); ?>
+
     </div>
 
     <section class="section main-section my-52">
@@ -239,22 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="flex items-center justify-between">
-              <div class="field spaced">
-                <label class="label">Date_Of_Birth</label>
-                <p class="control icons-left">
-                  <input required
-                    class="input"
-                    type="date"
-                    name="date_of_birth"
-                    value="<?php echo $_POST["date_of_birth"] ?? null ?>"
-                    placeholder="date_of_birth"
-                    autocomplete="current-date_of_birth" />
-                  <span class="icon is-small left"><i class="mdi mdi-calculator"></i></span>
-                </p>
-                <p class="help">Please enter your date of birth</p>
-                <p class="text-red-500" id="message" id="message"><?php echo $errors["date_of_birth"] ?? null ?></p>
 
-              </div>
 
               <div class="control">
                 <label class="label">role_id</label>
@@ -276,8 +272,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
               </div>
+
+              <div class="control">
+                <label class="label">Status</label>
+                <select
+                  class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md"
+                  name="is_active"
+                  id="is_active">
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </select>
+
+
+              </div>
             </div>
 
+            <div class="field spaced">
+              <label class="label">Date_Of_Birth</label>
+              <p class="control icons-left">
+                <input required
+                  class="input"
+                  type="date"
+                  name="date_of_birth"
+                  value="<?php echo $_POST["date_of_birth"] ?? null ?>"
+                  placeholder="date_of_birth"
+                  autocomplete="current-date_of_birth" />
+                <span class="icon is-small left"><i class="mdi mdi-calculator"></i></span>
+              </p>
+              <p class="help">Please enter your date of birth</p>
+              <p class="text-red-500" id="message" id="message"><?php echo $errors["date_of_birth"] ?? null ?></p>
+
+            </div>
             <!-- <div class="field spaced">
               <label class="block mb-2 text-sm font-medium text-gray-700">Role</label>
               <div class="relative">
@@ -367,7 +392,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </div>
   </div>
-
+  <script>
+    setTimeout(() => {
+      const messageDiv = document.getElementById('message');
+      if (messageDiv) {
+        messageDiv.style.display = 'none';
+      }
+    }, 10000);
+  </script>
   <!-- Scripts below are for demo only -->
   <script
     type="text/javascript"
