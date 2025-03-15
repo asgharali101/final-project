@@ -26,7 +26,7 @@ if ($role_id == 1 || $role_id == 2) {
     $topicStmt = $conn->query("SELECT * from topics where course_id=$id");
     $topics = $topicStmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
-    $currentEnrollUser = $conn->query("SELECT * FROM enrollments WHERE user_id = $user_id AND course_id = $id AND is_active=1")->fetch(PDO::FETCH_ASSOC);
+    $currentEnrollUser = $conn->query("SELECT * FROM enrollments WHERE user_id = $user_id AND course_id = $id AND is_active=1   ")->fetch(PDO::FETCH_ASSOC);
 
     if (! $currentEnrollUser) {
         header("location:../error.php");
