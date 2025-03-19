@@ -34,10 +34,7 @@ $url = basename($_SERVER['REQUEST_URI']);
     href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap">
   <link rel="stylesheet" href="../../css/toastr.min.css">
   <link rel="stylesheet" href="../../css/swiper-bundle.min.css">
   <script src="../../js/lozad.min.js"></script>
